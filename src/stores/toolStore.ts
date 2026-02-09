@@ -166,6 +166,26 @@ export const useToolStore = defineStore('tool', () => {
     return createTool(duplicate);
   }
 
+  async function toggleTool(id: number, is_active: boolean): Promise<boolean> {
+    loading.value = true;
+    error.value = null;
+    try {
+      const result = await toolConfigApi.toggleToolActive(id, is_active);
+      if (result.success) {
+        await loadTools();
+        return true;
+      }
+      error.value = result.message || '切换状态失败';
+      return false;
+    } catch (e: any) {
+      error.value = e.message || '切换状态失败';
+      console.error('Failed to toggle tool:', e);
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
   async function importToolsFromFile(file: File): Promise<boolean> {
     loading.value = true;
     error.value = null;
@@ -227,6 +247,7 @@ export const useToolStore = defineStore('tool', () => {
     updateTool,
     deleteTool,
     duplicateTool,
+    toggleTool,
     importToolsFromFile,
     exportAllTools,
     setFilter,

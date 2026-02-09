@@ -89,6 +89,21 @@ export async function deleteTool(id: number): Promise<ToolOperationResult> {
 }
 
 /**
+ * 切换工具启用状态
+ * PUT /tools/active?id={id}
+ * Body: { is_active: boolean }
+ * Response: { success: true, data: ToolConfig, message: string }
+ */
+export async function toggleToolActive(id: number, is_active: boolean): Promise<ToolOperationResult> {
+  const response = await request.put<ApiResponse<ToolConfig>>(`${API_BASE}/active?id=${id}`, { is_active });
+  return {
+    success: response.data.success,
+    message: response.data.message || (is_active ? '已启用' : '已停用'),
+    data: response.data.data
+  };
+}
+
+/**
  * 批量导入工具
  * POST /tools/import
  * Body: { tools: ToolConfig[] }
@@ -224,6 +239,7 @@ export const toolConfigApi = {
   createTool,
   updateTool,
   deleteTool,
+  toggleToolActive,
   importTools,
   exportTools,
   getInheritableTools,

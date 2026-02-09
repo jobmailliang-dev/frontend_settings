@@ -13,24 +13,25 @@ const emit = defineEmits<{
   edit: [tool: ToolConfig];
   duplicate: [tool: ToolConfig];
   delete: [tool: ToolConfig];
+  toggle: [tool: ToolConfig];
 }>();
 
-const statusText = computed(() => props.tool.is_active ? '活跃' : '停用');
-const statusClass = computed(() => props.tool.is_active ? 'status-active' : 'status-inactive');
+const isActive = computed(() => props.tool.is_active);
 </script>
 
 <template>
   <div class="tool-card">
-    <div class="tool-header">
+    <div class="tool-card-header">
       <div class="tool-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
         </svg>
       </div>
-      <div class="tool-title">
-        <h3>{{ tool.name }}</h3>
-        <span :class="['status-tag', statusClass]">{{ statusText }}</span>
-      </div>
+      <h3>{{ tool.name }}</h3>
+      <label class="switch">
+        <input type="checkbox" :checked="isActive" @change="emit('toggle', tool)" />
+        <span class="slider"></span>
+      </label>
     </div>
 
     <p class="tool-description">{{ tool.description }}</p>
@@ -96,7 +97,7 @@ const statusClass = computed(() => props.tool.is_active ? 'status-active' : 'sta
   border-color: rgba(0, 0, 0, 0.12);
 }
 
-.tool-header {
+.tool-card-header {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -114,35 +115,60 @@ const statusClass = computed(() => props.tool.is_active ? 'status-active' : 'sta
   color: #37352f;
 }
 
-.tool-title {
+.tool-card-header h3 {
   flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.tool-title h3 {
   font-size: 15px;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
 }
 
-.status-tag {
-  font-size: 11px;
-  font-weight: 500;
-  padding: 2px 8px;
-  border-radius: 10px;
+/* 开关样式 */
+.switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  cursor: pointer;
 }
 
-.status-active {
-  background: rgba(52, 199, 89, 0.15);
-  color: #34c759;
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
-.status-inactive {
-  background: rgba(142, 142, 147, 0.15);
-  color: #8e8e93;
+.slider {
+  position: absolute;
+  inset: 0;
+  background-color: #e9e9e9;
+  border-radius: 24px;
+  transition: 0.3s;
+}
+
+.slider::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.switch input:checked + .slider {
+  background-color: #34c759;
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+.switch input:disabled + .slider {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .tool-description {

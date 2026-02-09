@@ -128,6 +128,16 @@ const handleDuplicate = async (tool: ToolConfig) => {
   }
 };
 
+const handleToggle = async (tool: ToolConfig) => {
+  const newStatus = !tool.is_active;
+  const result = await store.toggleTool(tool.id!, newStatus);
+  if (result) {
+    ElMessage.success(newStatus ? '已启用' : '已停用');
+  } else {
+    ElMessage.error(store.error || '操作失败');
+  }
+};
+
 const handleTest = (tool: ToolConfig) => {
   debugTool.value = tool;
   showDebugPanel.value = true;
@@ -219,6 +229,7 @@ const toggleFullscreen = () => {
           @edit="startEdit($event)"
           @duplicate="handleDuplicate"
           @delete="handleDelete"
+          @toggle="handleToggle"
         />
       </div>
     </div>
