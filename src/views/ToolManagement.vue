@@ -263,33 +263,6 @@ const toggleFullscreen = () => {
                   language="javascript"
                   height="400px"
                 />
-
-                <!-- 继承信息 -->
-                <div v-if="store.inheritableTools.length > 0" class="inherit-info">
-                  <label>继承自:</label>
-                  <select v-model="editForm.inherit_from" class="inherit-select">
-                    <option value="">无</option>
-                    <option
-                      v-for="tool in store.inheritableTools"
-                      :key="tool.id"
-                      :value="tool.name"
-                    >
-                      {{ tool.name }}
-                    </option>
-                  </select>
-                  <button
-                    v-if="editForm.inherit_from"
-                    class="manus-btn sync-btn"
-                    @click="syncParameters"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="23 4 23 10 17 10"/>
-                      <polyline points="1 20 1 14 7 14"/>
-                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-                    </svg>
-                    同步参数
-                  </button>
-                </div>
               </div>
 
               <!-- 右侧：配置面板 -->
@@ -329,6 +302,33 @@ const toggleFullscreen = () => {
                       <input v-model="editForm.is_active" type="checkbox" />
                       <span>启用此工具</span>
                     </label>
+                  </div>
+
+                  <!-- 继承信息 -->
+                  <div v-if="store.inheritableTools.length > 0" class="inherit-info">
+                    <label>继承自:</label>
+                    <select v-model="editForm.inherit_from" class="inherit-select">
+                      <option value="">无</option>
+                      <option
+                        v-for="tool in store.inheritableTools"
+                        :key="tool.id"
+                        :value="tool.name"
+                      >
+                        {{ tool.name }}
+                      </option>
+                    </select>
+                    <button
+                      v-if="editForm.inherit_from"
+                      class="manus-btn sync-btn"
+                      @click="syncParameters"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"/>
+                        <polyline points="1 20 1 14 7 14"/>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                      </svg>
+                      同步参数
+                    </button>
                   </div>
                 </div>
 
