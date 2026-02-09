@@ -51,6 +51,7 @@ const startEdit = (tool?: ToolConfig) => {
   } else {
     resetEditForm();
   }
+  editingTool.value = tool || {} as ToolConfig;
   showDebugPanel.value = false;
 };
 
@@ -171,8 +172,9 @@ const mainPadding = computed(() => showDebugPanel.value ? '0' : '0');
 
 <template>
   <div class="tool-management">
-    <!-- 顶部筛选栏 -->
+    <!-- 顶部筛选栏（编辑模式下隐藏） -->
     <ToolListFilter
+      v-if="!editingTool"
       @create="startEdit()"
       @import="showImportDialog = true"
       @export="handleExport"
