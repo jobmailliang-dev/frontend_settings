@@ -54,6 +54,25 @@ const moveParameter = (index: number, direction: 'up' | 'down') => {
 };
 
 const emptyCount = computed(() => localParams.value.filter(p => !p.name).length);
+
+let draggedIndex: number | null = null;
+
+const onDragStart = (index: number) => {
+  draggedIndex = index;
+};
+
+const onDragOver = (e: DragEvent) => {
+  e.preventDefault();
+};
+
+const onDrop = (e: DragEvent, dropIndex: number) => {
+  e.preventDefault();
+  if (draggedIndex !== null && draggedIndex !== dropIndex) {
+    const item = localParams.value.splice(draggedIndex, 1)[0];
+    localParams.value.splice(dropIndex, 0, item);
+  }
+  draggedIndex = null;
+};
 </script>
 
 <template>
@@ -101,7 +120,15 @@ const emptyCount = computed(() => localParams.value.filter(p => !p.name).length)
     </div>
 
     <div v-else class="param-list">
-      <div v-for="(param, index) in localParams" :key="index" class="param-item">
+      <div
+        v-for="(param, index) in localParams"
+        :key="index"
+        class="param-item"
+        draggable="true"
+        @dragstart="onDragStart(index)"
+        @dragover="onDragOver"
+        @drop="onDrop($event, index)"
+      >
         <div class="param-left">
           <div class="param-drag">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -246,6 +273,7 @@ const emptyCount = computed(() => localParams.value.filter(p => !p.name).length)
   border-radius: 8px;
   margin-bottom: 6px;
   transition: background 0.15s ease;
+  cursor: grab;
 }
 
 .param-item:hover {
@@ -258,6 +286,10 @@ const emptyCount = computed(() => localParams.value.filter(p => !p.name).length)
 
 .param-item:last-child {
   margin-bottom: 0;
+}
+
+.param-item[draggable="true"]:active {
+  cursor: grabbing;
 }
 
 .param-left {
