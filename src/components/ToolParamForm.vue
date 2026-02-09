@@ -376,7 +376,7 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
 
 /* 对象类型键值对固定宽度 */
 .object-input-fixed {
-  width: 200px;
+  width: 240px;
   flex-shrink: 0;
 }
 

@@ -107,7 +107,7 @@ const removeItem = (index: number) => {
 
 <style scoped>
 .object-input-container {
-  width: 200px;
+  width: 100%;
 }
 
 .object-items {
@@ -124,7 +124,8 @@ const removeItem = (index: number) => {
 }
 
 .object-item-input {
-  width: 80px;
+  flex: 1;
+  min-width: 0;
   height: 28px;
   padding: 0 8px;
   border: 1px solid rgba(0, 0, 0, 0.1);
