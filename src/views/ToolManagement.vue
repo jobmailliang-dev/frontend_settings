@@ -554,7 +554,7 @@ const toggleFullscreen = () => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 16px;
+  padding: 0;
   overflow-y: auto;
   border-left: 1px solid rgba(0, 0, 0, 0.08);
 }
@@ -562,7 +562,6 @@ const toggleFullscreen = () => {
 .config-card {
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 12px;
   padding: 16px;
 }
 
@@ -730,7 +729,7 @@ const toggleFullscreen = () => {
 .edit-dialog {
   width: 90%;
   max-width: 1200px;
-  max-height: 85vh;
+  height: 88vh;
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
@@ -803,6 +802,7 @@ const toggleFullscreen = () => {
 
 .dialog-content .config-section {
   width: 380px;
+  overflow-y: auto;
   border-left: 1px solid rgba(0, 0, 0, 0.08);
 }
 

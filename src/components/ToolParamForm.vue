@@ -151,26 +151,6 @@ const emptyCount = computed(() => localParams.value.filter(p => !p.name).length)
         </div>
 
         <div class="param-actions">
-          <button
-            v-if="index > 0"
-            class="icon-btn"
-            @click="moveParameter(index, 'up')"
-            title="上移"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="18 15 12 9 6 15"/>
-            </svg>
-          </button>
-          <button
-            v-if="index < localParams.length - 1"
-            class="icon-btn"
-            @click="moveParameter(index, 'down')"
-            title="下移"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
-          </button>
           <button class="icon-btn delete" @click="removeParameter(index)" title="删除">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="3 6 5 6 21 6"/>
@@ -188,10 +168,12 @@ const emptyCount = computed(() => localParams.value.filter(p => !p.name).length)
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 12px;
-  overflow: hidden;
 }
 
 .param-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -253,8 +235,6 @@ const emptyCount = computed(() => localParams.value.filter(p => !p.name).length)
 
 .param-list {
   padding: 8px;
-  max-height: 280px;
-  overflow-y: auto;
 }
 
 .param-item {
@@ -321,7 +301,7 @@ const emptyCount = computed(() => localParams.value.filter(p => !p.name).length)
 }
 
 .param-label {
-  width: 50px;
+  width: 30px;
   flex-shrink: 0;
   font-size: 12px;
   color: #7e7d7a;
