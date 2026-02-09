@@ -90,18 +90,6 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
         参数配置
       </h4>
       <div class="header-actions">
-        <button
-          v-if="inheritFrom"
-          class="manus-btn sync-btn"
-          @click="$emit('sync-params')"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="23 4 23 10 17 10"/>
-            <polyline points="1 20 1 14 7 14"/>
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-          </svg>
-          同步参数
-        </button>
         <button class="manus-btn" @click="addParameter">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="12" y1="5" x2="12" y2="19"/>

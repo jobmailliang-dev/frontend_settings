@@ -299,16 +299,30 @@ const toggleFullscreen = () => {
 
                   <div v-if="store.inheritableTools.length > 0" class="form-group">
                     <label>继承工具</label>
-                    <select v-model="editForm.inherit_from" class="form-input">
-                      <option value="">无</option>
-                      <option
-                        v-for="tool in store.inheritableTools"
-                        :key="tool.id"
-                        :value="tool.name"
+                    <div class="inherit-row">
+                      <select v-model="editForm.inherit_from" class="form-input">
+                        <option value="">无</option>
+                        <option
+                          v-for="tool in store.inheritableTools"
+                          :key="tool.id"
+                          :value="tool.name"
+                        >
+                          {{ tool.name }}
+                        </option>
+                      </select>
+                      <button
+                        v-if="editForm.inherit_from"
+                        class="manus-btn sync-btn"
+                        @click="syncParameters"
                       >
-                        {{ tool.name }}
-                      </option>
-                    </select>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="23 4 23 10 17 10"/>
+                          <polyline points="1 20 1 14 7 14"/>
+                          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                        </svg>
+                        同步参数
+                      </button>
+                    </div>
                   </div>
 
                   <div class="form-group-inline">
@@ -599,6 +613,15 @@ const toggleFullscreen = () => {
 .form-input:focus {
   background: #ffffff;
   border-color: #007aff;
+}
+
+.inherit-row {
+  display: flex;
+  gap: 8px;
+}
+
+.inherit-row .form-input {
+  flex: 1;
 }
 
 .form-textarea {
