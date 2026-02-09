@@ -16,6 +16,7 @@ const store = useToolStore();
 const showImportDialog = ref(false);
 const editingTool = ref<ToolConfig | null>(null);
 const showDebugPanel = ref(false);
+const debugTool = ref<ToolConfig | null>(null);
 const isCreating = ref(false);
 
 // 编辑表单数据
@@ -128,7 +129,7 @@ const handleDuplicate = async (tool: ToolConfig) => {
 };
 
 const handleTest = (tool: ToolConfig) => {
-  editingTool.value = tool;
+  debugTool.value = tool;
   showDebugPanel.value = true;
 };
 
@@ -363,7 +364,7 @@ const toggleFullscreen = () => {
         <div v-if="showDebugPanel" class="debug-dialog-overlay" @click.self="showDebugPanel = false">
           <div class="debug-dialog">
             <ToolDebugPanel
-              :tool="editingTool"
+              :tool="debugTool"
               @close="showDebugPanel = false"
             />
           </div>
