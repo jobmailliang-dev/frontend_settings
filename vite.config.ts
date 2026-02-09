@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => {
       }
     },
     server: {
-      port: 3000,
+      port: 3001,
       host: '0.0.0.0',
       // Mock 模式下禁用代理，让 MSW 拦截请求
       proxy: isMock ? undefined : {

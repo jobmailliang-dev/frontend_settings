@@ -23,6 +23,18 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Home',
         component: () => import('@/views/Home.vue'),
         meta: { requiresAuth: true }
+      },
+      {
+        path: 'workbench',
+        name: 'Workbench',
+        component: () => import('@/views/Workbench.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'tools',
+        name: 'ToolManagement',
+        component: () => import('@/views/ToolManagement.vue'),
+        meta: { requiresAuth: true }
       }
     ]
   },

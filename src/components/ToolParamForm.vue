@@ -1,0 +1,375 @@
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import type { ToolParameter, ParameterType } from '@/types/tool';
+
+interface Props {
+  modelValue: ToolParameter[];
+  inheritFrom?: string;
+}
+
+const props = defineProps<Props>();
+const emit = defineEmits<{
+  'update:modelValue': [params: ToolParameter[]];
+  'sync-params': [];
+}>();
+
+const parameterTypes: { value: ParameterType; label: string }[] = [
+  { value: 'string', label: '字符串' },
+  { value: 'number', label: '数字' },
+  { value: 'boolean', label: '布尔值' },
+  { value: 'array', label: '数组' },
+  { value: 'object', label: '对象' },
+];
+
+const localParams = ref<ToolParameter[]>([...props.modelValue]);
+
+watch(() => props.modelValue, (newVal) => {
+  localParams.value = [...newVal];
+}, { deep: true });
+
+watch(localParams, (newVal) => {
+  emit('update:modelValue', [...newVal]);
+}, { deep: true });
+
+const addParameter = () => {
+  localParams.value.push({
+    name: '',
+    description: '',
+    type: 'string',
+    required: false,
+  });
+};
+
+const removeParameter = (index: number) => {
+  localParams.value.splice(index, 1);
+};
+
+const moveParameter = (index: number, direction: 'up' | 'down') => {
+  const newIndex = direction === 'up' ? index - 1 : index + 1;
+  if (newIndex >= 0 && newIndex < localParams.value.length) {
+    const temp = localParams.value[index];
+    localParams.value[index] = localParams.value[newIndex];
+    localParams.value[newIndex] = temp;
+  }
+};
+
+const emptyCount = computed(() => localParams.value.filter(p => !p.name).length);
+</script>
+
+<template>
+  <div class="param-form">
+    <div class="param-header">
+      <h4>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"/>
+          <line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/>
+          <line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+        参数配置
+      </h4>
+      <div class="header-actions">
+        <button
+          v-if="inheritFrom"
+          class="manus-btn sync-btn"
+          @click="$emit('sync-params')"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/>
+            <polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          同步参数
+        </button>
+        <button class="manus-btn add-btn" @click="addParameter">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          添加参数
+        </button>
+      </div>
+    </div>
+
+    <div v-if="localParams.length === 0" class="empty-state">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+      </svg>
+      <p>暂无参数，点击上方按钮添加</p>
+    </div>
+
+    <div v-else class="param-list">
+      <div v-for="(param, index) in localParams" :key="index" class="param-item">
+        <div class="param-drag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="9" cy="5" r="1.5"/>
+            <circle cx="15" cy="5" r="1.5"/>
+            <circle cx="9" cy="12" r="1.5"/>
+            <circle cx="15" cy="12" r="1.5"/>
+            <circle cx="9" cy="19" r="1.5"/>
+            <circle cx="15" cy="19" r="1.5"/>
+          </svg>
+        </div>
+
+        <div class="param-fields">
+          <input
+            v-model="param.name"
+            type="text"
+            placeholder="参数名称"
+            class="param-input name-input"
+          />
+          <input
+            v-model="param.description"
+            type="text"
+            placeholder="参数描述"
+            class="param-input desc-input"
+          />
+          <select v-model="param.type" class="param-input type-select">
+            <option v-for="t in parameterTypes" :key="t.value" :value="t.value">
+              {{ t.label }}
+            </option>
+          </select>
+          <label class="checkbox-label">
+            <input v-model="param.required" type="checkbox" />
+            <span>必填</span>
+          </label>
+        </div>
+
+        <div class="param-actions">
+          <button
+            v-if="index > 0"
+            class="icon-btn"
+            @click="moveParameter(index, 'up')"
+            title="上移"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="18 15 12 9 6 15"/>
+            </svg>
+          </button>
+          <button
+            v-if="index < localParams.length - 1"
+            class="icon-btn"
+            @click="moveParameter(index, 'down')"
+            title="下移"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <button class="icon-btn delete" @click="removeParameter(index)" title="删除">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.param-form {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.param-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f8f8f7;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.param-header h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #37352f;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sync-btn, .add-btn {
+  height: 32px;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.add-btn {
+  background: #007aff;
+  border-color: #007aff;
+  color: #ffffff;
+}
+
+.add-btn:hover {
+  background: #0066d6;
+  border-color: #0066d6;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #8e8e93;
+}
+
+.empty-state svg {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.param-list {
+  padding: 8px;
+}
+
+.param-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px;
+  background: #fafafa;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  transition: background 0.15s ease;
+}
+
+.param-item:hover {
+  background: #f1f1f0;
+}
+
+.param-item:last-child {
+  margin-bottom: 0;
+}
+
+.param-drag {
+  color: #c7c5c0;
+  cursor: grab;
+}
+
+.param-drag:active {
+  cursor: grabbing;
+}
+
+.param-fields {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.param-input {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  font-size: 13px;
+  background: #ffffff;
+  color: #37352f;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.param-input:focus {
+  border-color: #007aff;
+}
+
+.name-input {
+  width: 140px;
+  font-weight: 500;
+}
+
+.desc-input {
+  flex: 1;
+}
+
+.type-select {
+  width: 100px;
+  cursor: pointer;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #7e7d7a;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.checkbox-label input {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.param-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.param-item:hover .param-actions {
+  opacity: 1;
+}
+
+.icon-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8e8e93;
+  transition: all 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #37352f;
+}
+
+.icon-btn.delete:hover {
+  background: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
+}
+
+@media (max-width: 768px) {
+  .param-fields {
+    flex-wrap: wrap;
+  }
+
+  .name-input {
+    width: 100%;
+  }
+
+  .type-select {
+    width: auto;
+    flex: 1;
+  }
+}
+</style>

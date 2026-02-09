@@ -80,6 +80,24 @@ export const api = {
   },
   delete<T = any>(url: string, config?: AxiosRequestConfig) {
     return request.delete<ApiResponse<T>>(url, config)
+  },
+  /**
+   * SSE 流式请求
+   */
+  stream<T = any>(url: string, data?: any): EventSource {
+    const token = localStorage.getItem('access_token')
+    const params = data ? '?' + new URLSearchParams(data).toString() : ''
+    const fullUrl = `${request.defaults.baseURL}${url}${params}`
+
+    const eventSource = new EventSource(fullUrl, {
+      withCredentials: true
+    })
+
+    eventSource.onerror = (error) => {
+      console.error('SSE Error:', error)
+    }
+
+    return eventSource
   }
 }
 

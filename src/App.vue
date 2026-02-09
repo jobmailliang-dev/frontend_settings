@@ -15,10 +15,14 @@ onMounted(() => {
 })
 </script>
 
-<style>
+<style lang="scss">
+@use '@/styles/variables.scss' as *;
+@use '@/styles/index.scss' as *;
+
 #app {
   width: 100%;
   height: 100vh;
+  background: $bg-page;
 }
 
 * {
@@ -29,7 +33,7 @@ onMounted(() => {
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: #f5f7fa;
-  color: #303133;
+  background: $bg-page;
+  color: $text-primary;
 }
 </style>

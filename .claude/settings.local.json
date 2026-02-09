@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Playwright__browser_evaluate",
+      "mcp__Playwright__browser_type",
+      "mcp__Playwright__browser_click",
+      "mcp__Playwright__browser_take_screenshot",
+      "WebFetch(domain:manus.im)",
+      "mcp__Playwright__browser_navigate",
+      "mcp__Playwright__browser_snapshot"
+    ]
+  }
+}

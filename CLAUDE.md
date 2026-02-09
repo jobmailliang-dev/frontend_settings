@@ -108,7 +108,99 @@ logout()          // 退出登录
 |------|------|------|
 | `/login` | 登录页面 | 无需认证 |
 | `/home` | 首页 | 需要认证 |
+| `/workbench` | 工作台 | 需要认证 |
+| `/tools` | 工具管理 | 需要认证 |
 | `/*` | 404 页面 | - |
+
+## 工具管理 API 规范
+
+### 重要说明
+
+**路径设计规则**：
+- `GET/POST /api/tools` - 工具列表/创建（集合操作）
+- `GET/PUT/DELETE /api/tool?id={id}` - 单个工具操作（使用查询参数）
+- `GET /api/tools/inheritable` - 可继承工具列表（二级路由）
+- `POST /api/tool/execute?id={id}` - 执行工具
+
+**⚠️ 禁止使用 `/api/tools/:id` 格式**：MSW Mock 会对嵌套路径产生匹配冲突。
+
+### API 响应格式
+
+所有 API 响应统一使用包装格式：
+
+```typescript
+interface ApiResponse<T> {
+  success: boolean;  // 操作是否成功
+  data: T;          // 响应数据
+  message?: string; // 提示信息
+  error?: string;   // 错误信息
+}
+```
+
+### 接口列表
+
+| 方法 | 路径 | 说明 | 请求体 | 响应数据 |
+|------|------|------|--------|----------|
+| GET | `/api/tools` | 获取工具列表 | - | `{ success: true, data: { tools: ToolConfig[], total: number } }` |
+| GET | `/api/tool?id={id}` | 获取单个工具 | - | `{ success: true, data: ToolConfig }` |
+| POST | `/api/tools` | 创建工具 | `Partial<ToolConfig>` | `{ success: true, data: ToolConfig, message: string }` |
+| PUT | `/api/tool?id={id}` | 更新工具 | `Partial<ToolConfig>` | `{ success: true, data: ToolConfig, message: string }` |
+| DELETE | `/api/tool?id={id}` | 删除工具 | - | `{ success: true, message: string }` |
+| POST | `/api/tools/import` | 批量导入工具 | `{ tools: ToolConfig[] }` | `{ success: true, data: ToolConfig[], message: string }` |
+| GET | `/api/tools/export` | 导出工具 | - | `Blob (JSON file)` |
+| GET | `/api/tools/inheritable` | 获取可继承工具 | - | `{ success: true, data: ToolConfig[] }` |
+| POST | `/api/tool/execute?id={id}` | 执行工具 | `{ params: Record<string, any> }` | `{ success: true, data: any, execution_time?: string }` |
+
+### ToolConfig 数据结构
+
+```typescript
+interface ToolConfig {
+  id?: number;
+  name: string;
+  description: string;
+  is_active: boolean;
+  parameters: ToolParameter[];
+  inherit_from?: string;
+  code: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface ToolParameter {
+  name: string;
+  description: string;
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  required: boolean;
+  default?: any;
+  enum?: string[];
+}
+```
+
+### Mock 数据格式（handlers.ts）
+
+编写 MSW Handler 时必须使用 `ApiResponse` 包装格式：
+
+```typescript
+// 正确示例
+http.get('/api/tools', () => {
+  return HttpResponse.json({
+    success: true,
+    data: { tools: mockTools, total: mockTools.length }
+  })
+}),
+
+http.get('/api/tools/inheritable', () => {
+  return HttpResponse.json({
+    success: true,
+    data: mockTools.filter((t: any) => t.is_active)
+  })
+}),
+
+// 错误示例（不要直接返回数组）
+http.get('/api/tools', () => {
+  return HttpResponse.json(mockTools)  // ❌ 缺少 success 和 data 包装
+})
+```
 
 ## 环境变量 (Environment Variables)
 
@@ -122,8 +214,128 @@ logout()          // 退出登录
 - `.env`: 真实 API 模式
 - `.env.mock`: Mock 模式（VITE_USE_MOCK=true）
 
+## 设计风格 (Design Style)
+
+### 风格定位
+
+采用 **Manus AI 风格**，现代浅色主题，简洁的卡片式布局，类似于 Notion 的极简设计风格。
+
+### 色彩方案
+
+| 元素 | 颜色值 | 用途 |
+|------|--------|------|
+| 页面背景 | `#ffffff` | 主内容区 |
+| 侧边栏背景 | `#ebebeb` | 侧边栏导航 |
+| 卡片背景 | `#fafafa` | 任务卡片 |
+| 面板背景 | `#f8f8f7` | 输入区域 |
+| 悬停背景 | `rgba(55, 53, 47, 0.06)` | 行悬停状态 |
+| 选中背景 | `rgba(55, 53, 47, 0.08)` | 选中状态 |
+| 主文字 | `#34322d` | 标题、正文 |
+| 次要文字 | `#858481` | 辅助说明、时间 |
+| 边框线 | `rgba(0, 0, 0, 0.12)` | 分隔线 |
+| 强调色 | `#e4e4e4` | 浅灰按钮、选中状态 |
+
+### 关键视觉特征
+
+- **浅色主题**：白色页面 + 浅灰侧边栏
+- **极简设计**：无阴影或少阴影，使用纯色为主
+- **柔和悬停**：半透明背景叠加
+- **圆角适中**：8-10px
+- **Notion 风格**：类似 Notion 的浅灰色系
+
+### 工具类
+
+```scss
+.manus-card    // 卡片容器样式
+.manus-btn     // 按钮样式
+.manus-link    // 链接样式
+.manus-input   // 输入框样式
+```
+
+### 设计tokens (`src/styles/variables.scss`)
+
+```scss
+// --- 基础颜色 (Colors) ---
+$bg-page: #ffffff;           // 页面主背景
+$bg-sidebar: #f8f8f7;        // 侧边栏，微调为 Manus 的浅灰感
+$bg-card: #ffffff;           // 卡片背景，Manus 首页卡片多为纯白悬浮
+$bg-panel: #f1f1f0;          // 底部/搜索面板背景，参考 Sublime 搜索栏
+$bg-hover: rgba(55, 53, 47, 0.08);   // 增加不透明度，提升交互感知
+$bg-selected: rgba(55, 53, 47, 0.12); // 选中态，更接近 Sublime 选区
+
+// --- 文字与语义 (Text & Semantics) ---
+$text-primary: #1a1a1a;      // 提升对比度，Manus 标题更黑
+$text-secondary: #7e7d7a;    // 辅助文字
+$text-code: #d4d4d4;         // 模拟图1中的代码文本色
+$border-base: rgba(0, 0, 0, 0.08);  // 更细致的边框
+$primary-blue: #007aff;      // 补充：AI 激活态或链接色
+$icon-color: #5f5e5b;        // 图标颜色
+
+// --- 深度与阴影 (Shadows) ---
+$shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+$shadow-md: 0 4px 12px rgba(0,0,0,0.08); // 用于 Manus 搜索框悬浮
+
+// --- 布局规格 (Layout) ---
+$sidebar-width: 260px;       // 参考 Manus 侧边栏宽度
+$panel-header-h: 48px;       // 顶部条高度
+
+// --- 按钮与输入框 (Component Tokens) ---
+$btn-height: 40px;           //
+$btn-padding-x: 16px;        
+$btn-border-radius-pill: 20px;
+$input-border-radius: 12px;  // 搜索框采用大圆角矩形
+```
+
+### 按钮风格 (Button Style)
+
+属性,修改/补充值,说明
+形状,pill,
+高度,40px,
+阴影,inset 0 0 0 1px $border-base,使用内阴影模拟边框，更显精致
+间距,gap: 6px,图标与文字间距微调
+字体,500 (Medium),按钮文字比正文略重，提升引导性
+过渡,"all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",模拟 AI 产品丝滑的反馈感
+
+### 按钮工具类
+
+```scss
+.manus-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 7px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 20px;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba(55, 53, 47, 0.06);
+  }
+
+  .icon {
+    width: 18px;
+    height: 18px;
+    color: #37352f;
+  }
+
+  .text {
+    color: #37352f;
+    font-size: 14px;
+    font-weight: 400;
+  }
+}
+```
+
 ## 变更记录 (Changelog)
 
 | 时间戳 | 操作 | 说明 |
 |--------|------|------|
 | 2026-02-06 | 初始化 | 创建前端脚手架项目 |
+| 2026-02-06 | 设计风格 | 引入飞书多维表格设计风格 |
+| 2026-02-06 | 新增页面 | 新增工作台页面 |
+| 2026-02-06 | 设计风格 | 更新为 Manus AI 浅色主题风格 |

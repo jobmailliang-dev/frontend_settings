@@ -1,4 +1,11 @@
-// Global styles
+// Global styles - Manus AI Style
+
+@use '@/styles/variables.scss' as *;
+
+// Global icon color
+.el-icon {
+  color: $icon-color;
+}
 
 * {
   margin: 0;
@@ -9,8 +16,9 @@
 html, body {
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: #f5f7fa;
-  line-height: 1.6;
+  background-color: $bg-page;
+  line-height: 1.5;
+  color: $text-primary;
 }
 
 #app {
@@ -18,20 +26,108 @@ html, body {
   overflow: hidden;
 }
 
+// Scrollbar
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f2f6fc;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #dcdfe6;
+  background: rgba(0, 0, 0, 0.16);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #c0c4cc;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+// Card base style
+.manus-card {
+  background: $bg-card;
+  border: 1px solid $border-base;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-card;
+}
+
+// Table row hover
+.table-row-hover {
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: $bg-hover;
+  }
+}
+
+// Link style
+.manus-link {
+  color: $text-primary;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    background-color: $bg-hover;
+  }
+}
+
+// Manus pill button
+.manus-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  height: $btn-height;
+  padding: $btn-padding-y $btn-padding-x;
+  border: 1px solid $btn-border-color;
+  border-radius: $border-radius-pill;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+
+  &:hover {
+    background: $btn-hover-bg;
+  }
+
+  &:active {
+    background: $btn-hover-bg;
+  }
+
+  .icon {
+    width: 18px;
+    height: 18px;
+    color: $icon-color;
+  }
+
+  .text {
+    color: $text-primary;
+    font-size: $btn-font-size;
+    font-weight: 500;
+  }
+}
+
+// Input style
+.manus-input {
+  background: $bg-panel;
+  border: 1px solid $border-base;
+  border-radius: $border-radius-lg;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: $text-primary;
+  transition: all 0.15s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-blue;
+    background: $bg-card;
+  }
+
+  &::placeholder {
+    color: $text-placeholder;
+  }
 }
