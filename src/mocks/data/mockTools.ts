@@ -61,5 +61,92 @@ async function execute(params) {
 }`,
     created_at: '2026-02-03T11:00:00Z',
     updated_at: '2026-02-06T10:15:00Z'
+  },
+  {
+    id: 4,
+    name: 'json_parser',
+    description: 'JSON 解析工具，用于解析和验证 JSON 字符串',
+    is_active: true,
+    parameters: [
+      { name: 'json', description: 'JSON 字符串', type: 'string', required: true },
+      { name: 'strict', description: '严格模式', type: 'boolean', required: false, default: true }
+    ],
+    code: `// JSON 解析工具
+function execute(params) {
+  const { json: jsonStr, strict } = params;
+  return { success: true, data: JSON.parse(jsonStr) };
+}`,
+    created_at: '2026-02-04T08:00:00Z',
+    updated_at: '2026-02-05T12:00:00Z'
+  },
+  {
+    id: 5,
+    name: 'date_formatter',
+    description: '日期格式化工具，支持多种日期格式转换',
+    is_active: true,
+    parameters: [
+      { name: 'date', description: '日期字符串', type: 'string', required: true },
+      { name: 'format', description: '输出格式', type: 'string', required: false, default: 'YYYY-MM-DD', enum: ['YYYY-MM-DD', 'YYYY/MM/DD', 'DD/MM/YYYY', 'MM/DD/YYYY'] }
+    ],
+    code: `// 日期格式化工具
+function execute(params) {
+  const { date, format } = params;
+  return { success: true, result: date };
+}`,
+    created_at: '2026-02-05T10:00:00Z',
+    updated_at: '2026-02-09T09:00:00Z'
+  },
+  {
+    id: 6,
+    name: 'csv_converter',
+    description: 'CSV 文件转换工具，支持 CSV 与 JSON 互转',
+    is_active: true,
+    parameters: [
+      { name: 'content', description: '文件内容', type: 'string', required: true },
+      { name: 'delimiter', description: '分隔符', type: 'string', required: false, default: ',', enum: [',', ';', '\\t', '|'] }
+    ],
+    code: `// CSV 转换工具
+function execute(params) {
+  const { content, delimiter } = params;
+  return { success: true, data: [] };
+}`,
+    created_at: '2026-02-06T14:00:00Z',
+    updated_at: '2026-02-08T16:30:00Z'
+  },
+  {
+    id: 7,
+    name: 'image_processor',
+    description: '图片处理工具，支持缩放、裁剪、格式转换',
+    is_active: false,
+    parameters: [
+      { name: 'image_path', description: '图片路径', type: 'string', required: true },
+      { name: 'operation', description: '操作类型', type: 'string', required: true, enum: ['resize', 'crop', 'rotate', 'convert'] },
+      { name: 'quality', description: '质量', type: 'number', required: false, default: 80 }
+    ],
+    code: `// 图片处理工具
+function execute(params) {
+  const { image_path, operation, quality } = params;
+  return { success: true, result: 'processed_image_path' };
+}`,
+    created_at: '2026-02-07T09:30:00Z',
+    updated_at: '2026-02-09T11:00:00Z'
+  },
+  {
+    id: 8,
+    name: 'encrypt_decrypt',
+    description: '加密解密工具，支持 AES、DES、RSA 等算法',
+    is_active: true,
+    parameters: [
+      { name: 'text', description: '待处理文本', type: 'string', required: true },
+      { name: 'algorithm', description: '加密算法', type: 'string', required: false, default: 'AES', enum: ['AES', 'DES', 'RSA'] },
+      { name: 'action', description: '操作', type: 'string', required: true, enum: ['encrypt', 'decrypt'] }
+    ],
+    code: `// 加密解密工具
+function execute(params) {
+  const { text, algorithm, action } = params;
+  return { success: true, result: 'processed_text' };
+}`,
+    created_at: '2026-02-08T11:00:00Z',
+    updated_at: '2026-02-09T14:00:00Z'
   }
 ];

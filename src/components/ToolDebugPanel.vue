@@ -169,7 +169,7 @@ const execute = async () => {
   } catch (e: any) {
     result.value = JSON.stringify({
       success: false,
-      error: e.message || '执行失败',
+      error: e.response.data.error || '执行失败',
     }, null, 2);
     executionTime.value = '0.000s';
   } finally {

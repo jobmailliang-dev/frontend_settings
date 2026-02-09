@@ -204,8 +204,8 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
                 <input v-model="param.hasEnum" type="checkbox" class="checkbox-input" />
               </div>
             </div>
-            <!-- 枚举值输入（仅字符串和数字类型可用） -->
-            <div v-if="param.hasEnum && supportsEnum(param)" class="param-field-row enum-field-row">
+            <!-- 枚举值输入（仅字符串和数字类型，且启用枚举时显示） -->
+            <div v-if="param.hasEnum" class="param-field-row enum-field-row">
               <div class="param-field">
                 <label class="param-label">枚举值</label>
                 <ListValueInput v-model="param.enum" />
@@ -411,6 +411,7 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
   cursor: pointer;
   accent-color: #007aff;
 }
+
 /* 对象类型键值对固定宽度 */
 .object-input-fixed {
   width: 240px;

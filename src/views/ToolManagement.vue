@@ -65,6 +65,7 @@ const saveTool = async () => {
 
   if (result) {
     ElMessage.success(isCreating.value ? '创建成功' : '保存成功');
+    await store.loadInheritableTools(); // 刷新可继承工具列表
     editingTool.value = null;
   } else {
     ElMessage.error(store.error || '操作失败');
@@ -396,14 +397,20 @@ const toggleFullscreen = () => {
 .tool-management {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: calc(100vh - 156px);
   background: #ffffff;
 }
 
 .content-wrapper {
   flex: 1;
-  overflow: hidden;
+  overflow-y: auto;
   transition: padding-right 0.3s ease;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
 }
 
 .tool-list {
@@ -450,11 +457,6 @@ const toggleFullscreen = () => {
   font-size: 13px;
 }
 
-.tool-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 16px;
-}
 
 .edit-view {
   display: flex;
@@ -468,7 +470,6 @@ const toggleFullscreen = () => {
   justify-content: space-between;
   padding: 12px 20px;
   background: #f8f8f7;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .back-btn {

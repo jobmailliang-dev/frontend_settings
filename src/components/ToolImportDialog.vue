@@ -28,6 +28,19 @@ const isValidTool = (tool: any): tool is ToolConfig => {
   );
 };
 
+// 处理 enum 字段，设置 hasEnum = true
+const processEnumField = (tools: ToolConfig[]) => {
+  tools.forEach(tool => {
+    if (tool.parameters) {
+      tool.parameters.forEach(param => {
+        if (param.enum && param.enum.length > 0) {
+          param.hasEnum = true;
+        }
+      });
+    }
+  });
+};
+
 const handleFileSelect = async (event: Event) => {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
@@ -45,9 +58,11 @@ const handleFileSelect = async (event: Event) => {
       if (validTools.length === 0) {
         importError.value = '文件中未找到有效的工具配置';
       } else {
+        processEnumField(validTools as ToolConfig[]);
         importedTools.value = validTools as ToolConfig[];
       }
     } else if (isValidTool(parsed)) {
+      processEnumField([parsed as ToolConfig]);
       importedTools.value = [parsed as ToolConfig];
     } else {
       importError.value = '文件格式无效，必须是工具对象或工具数组';
@@ -82,9 +97,11 @@ const handleDrop = async (event: DragEvent) => {
       if (validTools.length === 0) {
         importError.value = '文件中未找到有效的工具配置';
       } else {
+        processEnumField(validTools as ToolConfig[]);
         importedTools.value = validTools as ToolConfig[];
       }
     } else if (isValidTool(parsed)) {
+      processEnumField([parsed as ToolConfig]);
       importedTools.value = [parsed as ToolConfig];
     } else {
       importError.value = '文件格式无效';
