@@ -65,9 +65,9 @@ pnpm format           # Prettier
 
 ```typescript
 // 认证接口
-authApi.login(data)       // POST /auth/login
-authApi.register(data)    // POST /auth/register
-authApi.getCurrentUser()  // GET /auth/me
+authApi.login(data)       // POST /api/auth/login
+authApi.register(data)    // POST /api/auth/register
+authApi.getCurrentUser()  // GET /api/auth/me
 authApi.logout()          // 清除本地 token
 ```
 
@@ -94,35 +94,89 @@ logout()          // 退出登录
 
 ## 工具管理 API 规范
 
-### API 层路径规则
+### API 路径规则
 
-在 `api/toolConfig.ts` 中定义 API 基础路径：
+**核心原则**：所有工具 API 使用统一基础路径 `/tools`，通过 HTTP 方法和查询参数区分操作类型。
 
-```typescript
-/** API 基础路径 */
-const API_BASE = '/tools';
+```
+API_BASE = '/tools'
 ```
 
-**路径拼接规则**：
-- 集合操作（列表、创建）：`${API_BASE}` → `/tools`
-- 单资源操作（查询、更新、删除、执行）：`${API_BASE}/tool?id=${id}` → `/tool?id={id}`
-- 二级路由：`${API_BASE}/inheritable` → `/tools/inheritable`
+**路径设计**：
 
-**⚠️ 禁止使用 `/api/tools/:id` 格式**：MSW Mock 会对嵌套路径产生匹配冲突。
+| 操作类型 | 前端路径 | MSW 路径 | 说明 |
+|---------|----------|----------|------|
+| 列表 | `/tools` | `/api/tools` | GET 获取工具列表 |
+| 单资源 | `/tools?id={id}` | `/api/tools?id={id}` | GET/PUT/DELETE 获取/更新/删除单个 |
+| 创建 | `/tools` | `/api/tools` | POST 创建工具 |
+| 导入 | `/tools/import` | `/api/tools/import` | POST 批量导入 |
+| 导出 | `/tools/export` | `/api/tools/export` | GET 导出工具 |
+| 继承列表 | `/tools/inheritable` | `/api/tools/inheritable` | GET 可继承工具 |
+| 执行 | `/tools/execute?id={id}` | `/api/tools/execute?id={id}` | POST 执行工具 |
+
+**关键规则**：
+- 单资源操作（查询、更新、删除、执行）使用查询参数 `?id={id}`
+- 禁止使用路径参数 `/tools/:id`（MSW 匹配冲突）
+- 二级路由直接拼接在 `/tools` 后
 
 ### 接口列表
 
 | 方法 | 路径 | 说明 | 请求体 | 响应数据 |
 |------|------|------|--------|----------|
-| GET | `/tools` | 获取工具列表 | - | `{ success: true, data: { tools: ToolConfig[], total: number } }` |
-| GET | `/tool?id={id}` | 获取单个工具 | - | `{ success: true, data: ToolConfig }` |
-| POST | `/tools` | 创建工具 | `Partial<ToolConfig>` | `{ success: true, data: ToolConfig, message: string }` |
-| PUT | `/tool?id={id}` | 更新工具 | `Partial<ToolConfig>` | `{ success: true, data: ToolConfig, message: string }` |
-| DELETE | `/tool?id={id}` | 删除工具 | - | `{ success: true, message: string }` |
-| POST | `/tools/import` | 批量导入工具 | `{ tools: ToolConfig[] }` | `{ success: true, data: ToolConfig[], message: string }` |
-| GET | `/tools/export` | 导出工具 | - | `Blob (JSON file)` |
-| GET | `/tools/inheritable` | 获取可继承工具 | - | `{ success: true, data: ToolConfig[] }` |
-| POST | `/tool/execute?id={id}` | 执行工具 | `{ params: Record<string, any> }` | `{ success: true, data: any, execution_time?: string }` |
+| GET | `/api/tools` | 获取工具列表 | - | `{ success: true, data: ToolConfig[] }` |
+| GET | `/api/tools?id={id}` | 获取单个工具 | - | `{ success: true, data: ToolConfig }` |
+| POST | `/api/tools` | 创建工具 | `Partial<ToolConfig>` | `{ success: true, data: ToolConfig, message: string }` |
+| PUT | `/api/tools?id={id}` | 更新工具 | `Partial<ToolConfig>` | `{ success: true, data: ToolConfig, message: string }` |
+| DELETE | `/api/tools?id={id}` | 删除工具 | - | `{ success: true, message: string }` |
+| POST | `/api/tools/import` | 批量导入工具 | `{ tools: ToolConfig[] }` | `{ success: true, data: ToolConfig[], message: string }` |
+| GET | `/api/tools/export` | 导出工具 | - | `Blob (JSON file)` |
+| GET | `/api/tools/inheritable` | 获取可继承工具 | - | `{ success: true, data: ToolConfig[] }` |
+| POST | `/api/tools/execute?id={id}` | 执行工具 | `{ params: Record<string, any> }` | `{ success: true, data: any, execution_time?: string }` |
+
+### 前端 API 代码示例
+
+```typescript
+// api/toolConfig.ts
+const API_BASE = '/tools';
+
+// 集合操作 - 无需查询参数
+export async function getTools(): Promise<ToolConfig[]> {
+  const response = await request.get<ApiResponse<ToolConfig[]>>(API_BASE);
+  return response.data.data || [];
+}
+
+export async function createTool(tool: Partial<ToolConfig>): Promise<ToolOperationResult> {
+  const response = await request.post<ApiResponse<ToolConfig>>(API_BASE, tool);
+  return { success: response.data.success, message: response.data.message || '创建成功', data: response.data.data };
+}
+
+// 单资源操作 - 必须带查询参数 ?id={id}
+export async function getTool(id: number): Promise<ToolConfig | null> {
+  const response = await request.get<ApiResponse<ToolConfig>>(`${API_BASE}?id=${id}`);
+  return response.data.data || null;
+}
+
+export async function updateTool(id: number, tool: Partial<ToolConfig>): Promise<ToolOperationResult> {
+  const response = await request.put<ApiResponse<ToolConfig>>(`${API_BASE}?id=${id}`, tool);
+  return { success: response.data.success, message: response.data.message || '更新成功', data: response.data.data };
+}
+
+export async function deleteTool(id: number): Promise<ToolOperationResult> {
+  const response = await request.delete<ApiResponse<null>>(`${API_BASE}?id=${id}`);
+  return { success: response.data.success, message: response.data.message || '删除成功' };
+}
+
+// 二级路由 - 直接拼接
+export async function getInheritableTools(): Promise<ToolConfig[]> {
+  const response = await request.get<ApiResponse<ToolConfig[]>>(`${API_BASE}/inheritable`);
+  return response.data.data || [];
+}
+
+export async function executeTool(toolId: number, params: Record<string, any>): Promise<ToolExecuteResponse> {
+  const response = await request.post<ApiResponse<ToolExecuteResponse>>(`${API_BASE}/execute?id=${toolId}`, params);
+  return response.data.data;
+}
+```
 
 ### 响应格式规范
 
@@ -131,24 +185,9 @@ const API_BASE = '/tools';
 ```typescript
 interface ApiResponse<T> {
   success: boolean;   // 操作是否成功
-  data: T;            // 响应数据
-  message?: string;   // 提示信息
+  data: T;           // 响应数据
+  message?: string;  // 提示信息
   error?: string;     // 错误信息
-}
-```
-
-**前端接收处理**：
-
-```typescript
-// API 函数示例
-export async function getTools(): Promise<ToolConfig[]> {
-  const response = await request.get<ApiResponse<ToolListResponse>>(API_BASE);
-  return response.data.data || [];  // 提取 data 中的 tools 数组
-}
-
-export async function getTool(id: number): Promise<ToolConfig | null> {
-  const response = await request.get<ApiResponse<ToolConfig>>(`${API_BASE}/tool?id=${id}`);
-  return response.data.data || null;
 }
 ```
 
@@ -183,27 +222,59 @@ Mock 响应必须使用与真实 API 相同的包装格式：
 
 ```typescript
 // handlers.ts
-import { http } from 'msw';
+import { http, HttpResponse } from 'msw';
 
-// 正确示例 - 集合操作
-http.get('/tools', () => {
-  return HttpResponse.json({
-    success: true,
-    data: { tools: mockTools, total: mockTools.length }
-  })
+// 集合操作 - GET /api/tools 用于列表
+http.get('/api/tools', () => {
+  return HttpResponse.json({ success: true, data: mockTools })
 }),
 
-// 正确示例 - 二级路由
-http.get('/tools/inheritable', () => {
-  return HttpResponse.json({
-    success: true,
-    data: mockTools.filter((t: any) => t.is_active)
-  })
+// 单资源操作 - GET /api/tools?id={id}
+http.get('/api/tools', ({ request }) => {
+  const url = new URL(request.url)
+  const id = parseInt(url.searchParams.get('id') || '0')
+  const tool = mockTools.find(t => t.id === id)
+  if (tool) {
+    return HttpResponse.json({ success: true, data: tool })
+  }
+  return HttpResponse.json({ success: false, error: 'Tool not found' }, { status: 404 })
 }),
 
-// 错误示例（不要直接返回数组）
-http.get('/tools', () => {
-  return HttpResponse.json(mockTools)  // ❌ 缺少 success 和 data 包装
+// 创建操作
+http.post('/api/tools', async ({ request }) => {
+  const body = await request.json()
+  const newTool = { ...body, id: Date.now(), created_at: new Date().toISOString() }
+  mockTools.push(newTool)
+  return HttpResponse.json({ success: true, message: 'Tool created', data: newTool })
+}),
+
+// 更新操作 - PUT /api/tools?id={id}
+http.put('/api/tools', async ({ request }) => {
+  const url = new URL(request.url)
+  const id = parseInt(url.searchParams.get('id') || '0')
+  const body = await request.json()
+  // 更新逻辑...
+  return HttpResponse.json({ success: true, message: 'Tool updated', data: updatedTool })
+}),
+
+// 删除操作 - DELETE /api/tools?id={id}
+http.delete('/api/tools', ({ request }) => {
+  const url = new URL(request.url)
+  const id = parseInt(url.searchParams.get('id') || '0')
+  // 删除逻辑...
+  return HttpResponse.json({ success: true, message: 'Tool deleted' })
+}),
+
+// 二级路由 - GET /api/tools/inheritable
+http.get('/api/tools/inheritable', () => {
+  return HttpResponse.json({ success: true, data: mockTools.filter(t => t.is_active) })
+}),
+
+// 执行操作 - POST /api/tools/execute?id={id}
+http.post('/api/tools/execute', async ({ request }) => {
+  const url = new URL(request.url)
+  const id = parseInt(url.searchParams.get('id') || '0')
+  return HttpResponse.json({ success: true, data: { result: 'Mock result', execution_time: '0.01s' } })
 })
 ```
 
@@ -281,7 +352,7 @@ $sidebar-width: 260px;       // 参考 Manus 侧边栏宽度
 $panel-header-h: 48px;       // 顶部条高度
 
 // --- 按钮与输入框 (Component Tokens) ---
-$btn-height: 40px;           //
+$btn-height: 40px;
 $btn-padding-x: 16px;
 $btn-border-radius-pill: 20px;
 $input-border-radius: 12px;  // 搜索框采用大圆角矩形
@@ -341,4 +412,4 @@ $input-border-radius: 12px;  // 搜索框采用大圆角矩形
 | 2026-02-06 | 设计风格 | 引入飞书多维表格设计风格 |
 | 2026-02-06 | 新增页面 | 新增工作台页面 |
 | 2026-02-06 | 设计风格 | 更新为 Manus AI 浅色主题风格 |
-| 2026-02-09 | API 规范 | 整合 API 路径规则到 toolConfig.ts，完善响应格式规范 |
+| 2026-02-09 | API 规范 | 整合工具管理 API 路径规则，统一使用查询参数 |
