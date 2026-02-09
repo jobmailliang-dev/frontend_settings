@@ -102,39 +102,52 @@ const emptyCount = computed(() => localParams.value.filter(p => !p.name).length)
 
     <div v-else class="param-list">
       <div v-for="(param, index) in localParams" :key="index" class="param-item">
-        <div class="param-drag">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="9" cy="5" r="1.5"/>
-            <circle cx="15" cy="5" r="1.5"/>
-            <circle cx="9" cy="12" r="1.5"/>
-            <circle cx="15" cy="12" r="1.5"/>
-            <circle cx="9" cy="19" r="1.5"/>
-            <circle cx="15" cy="19" r="1.5"/>
-          </svg>
-        </div>
+        <div class="param-left">
+          <div class="param-drag">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="9" cy="5" r="1.5"/>
+              <circle cx="15" cy="5" r="1.5"/>
+              <circle cx="9" cy="12" r="1.5"/>
+              <circle cx="15" cy="12" r="1.5"/>
+              <circle cx="9" cy="19" r="1.5"/>
+              <circle cx="15" cy="19" r="1.5"/>
+            </svg>
+          </div>
 
-        <div class="param-fields">
-          <input
-            v-model="param.name"
-            type="text"
-            placeholder="参数名称"
-            class="param-input name-input"
-          />
-          <input
-            v-model="param.description"
-            type="text"
-            placeholder="参数描述"
-            class="param-input desc-input"
-          />
-          <select v-model="param.type" class="param-input type-select">
-            <option v-for="t in parameterTypes" :key="t.value" :value="t.value">
-              {{ t.label }}
-            </option>
-          </select>
-          <label class="checkbox-label">
-            <input v-model="param.required" type="checkbox" />
-            <span>必填</span>
-          </label>
+          <div class="param-fields">
+            <div class="param-field">
+              <label class="param-label">名称</label>
+              <input
+                v-model="param.name"
+                type="text"
+                placeholder="参数名称"
+                class="param-input"
+              />
+            </div>
+            <div class="param-field">
+              <label class="param-label">描述</label>
+              <input
+                v-model="param.description"
+                type="text"
+                placeholder="参数描述"
+                class="param-input"
+              />
+            </div>
+            <div class="param-field-row">
+              <div class="param-field">
+                <label class="param-label">类型</label>
+                <select v-model="param.type" class="param-input">
+                  <option v-for="t in parameterTypes" :key="t.value" :value="t.value">
+                    {{ t.label }}
+                  </option>
+                </select>
+              </div>
+              <div class="param-field param-field-checkbox">
+                <label class="param-label">必填</label>
+                <input v-model="param.required" type="checkbox" class="checkbox-input" />
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="param-actions">
@@ -240,11 +253,13 @@ const emptyCount = computed(() => localParams.value.filter(p => !p.name).length)
 
 .param-list {
   padding: 8px;
+  max-height: 280px;
+  overflow-y: auto;
 }
 
 .param-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   padding: 10px 8px;
   background: #fafafa;
@@ -257,13 +272,25 @@ const emptyCount = computed(() => localParams.value.filter(p => !p.name).length)
   background: #f1f1f0;
 }
 
+.param-item:hover .param-actions {
+  opacity: 1;
+}
+
 .param-item:last-child {
   margin-bottom: 0;
+}
+
+.param-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1;
 }
 
 .param-drag {
   color: #c7c5c0;
   cursor: grab;
+  padding: 4px 0;
 }
 
 .param-drag:active {
@@ -273,11 +300,45 @@ const emptyCount = computed(() => localParams.value.filter(p => !p.name).length)
 .param-fields {
   flex: 1;
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.param-field {
+  display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.param-field-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.param-field-checkbox {
+  flex-shrink: 0;
+}
+
+.param-label {
+  width: 50px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #7e7d7a;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+
+.param-label:hover {
+  overflow: visible;
+  white-space: normal;
 }
 
 .param-input {
+  flex: 1;
   height: 32px;
   padding: 0 10px;
   border: 1px solid rgba(0, 0, 0, 0.1);
@@ -293,34 +354,11 @@ const emptyCount = computed(() => localParams.value.filter(p => !p.name).length)
   border-color: #007aff;
 }
 
-.name-input {
-  width: 140px;
-  font-weight: 500;
-}
-
-.desc-input {
-  flex: 1;
-}
-
-.type-select {
-  width: 100px;
+.checkbox-input {
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: #7e7d7a;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.checkbox-label input {
-  width: 14px;
-  height: 14px;
-  cursor: pointer;
+  accent-color: #007aff;
 }
 
 .param-actions {
@@ -328,10 +366,6 @@ const emptyCount = computed(() => localParams.value.filter(p => !p.name).length)
   gap: 4px;
   opacity: 0;
   transition: opacity 0.15s ease;
-}
-
-.param-item:hover .param-actions {
-  opacity: 1;
 }
 
 .icon-btn {

@@ -52,32 +52,12 @@ pnpm lint             # ESLint
 pnpm format           # Prettier
 ```
 
-## Mock 方案 (Mock Scheme)
+## 环境变量 (Environment Variables)
 
-### 启用 Mock
-
-```bash
-# 方式1：使用预设命令
-pnpm dev:mock
-
-# 方式2：设置环境变量
-export VITE_USE_MOCK=true
-pnpm dev
-```
-
-### Mock 行为
-
-- 登录：任意邮箱密码组合均可登录成功
-- 返回数据：固定的 mock 用户信息和 token
-- API 拦截：MSW 在浏览器端拦截所有 /api/* 请求
-
-### Mock 文件说明
-
-| 文件 | 说明 |
-|------|------|
-| `src/mocks/handlers.ts` | MSW 请求处理器定义 |
-| `src/mocks/mockUser.ts` | Mock 用户数据 |
-| `src/mocks/server.ts` | MSW 服务初始化 |
+| 变量 | 说明 | 默认值 |
+|------|------|--------|
+| `VITE_API_TARGET` | 真实 API 目标地址 | `http://localhost:8000` |
+| `VITE_USE_MOCK` | 是否启用 MSW Mock | `false` |
 
 ## 目录结构详解 (Directory Structure)
 
@@ -114,44 +94,65 @@ logout()          // 退出登录
 
 ## 工具管理 API 规范
 
-### 重要说明
+### API 层路径规则
 
-**路径设计规则**：
-- `GET/POST /api/tools` - 工具列表/创建（集合操作）
-- `GET/PUT/DELETE /api/tool?id={id}` - 单个工具操作（使用查询参数）
-- `GET /api/tools/inheritable` - 可继承工具列表（二级路由）
-- `POST /api/tool/execute?id={id}` - 执行工具
-
-**⚠️ 禁止使用 `/api/tools/:id` 格式**：MSW Mock 会对嵌套路径产生匹配冲突。
-
-### API 响应格式
-
-所有 API 响应统一使用包装格式：
+在 `api/toolConfig.ts` 中定义 API 基础路径：
 
 ```typescript
-interface ApiResponse<T> {
-  success: boolean;  // 操作是否成功
-  data: T;          // 响应数据
-  message?: string; // 提示信息
-  error?: string;   // 错误信息
-}
+/** API 基础路径 */
+const API_BASE = '/tools';
 ```
+
+**路径拼接规则**：
+- 集合操作（列表、创建）：`${API_BASE}` → `/tools`
+- 单资源操作（查询、更新、删除、执行）：`${API_BASE}/tool?id=${id}` → `/tool?id={id}`
+- 二级路由：`${API_BASE}/inheritable` → `/tools/inheritable`
+
+**⚠️ 禁止使用 `/api/tools/:id` 格式**：MSW Mock 会对嵌套路径产生匹配冲突。
 
 ### 接口列表
 
 | 方法 | 路径 | 说明 | 请求体 | 响应数据 |
 |------|------|------|--------|----------|
-| GET | `/api/tools` | 获取工具列表 | - | `{ success: true, data: { tools: ToolConfig[], total: number } }` |
-| GET | `/api/tool?id={id}` | 获取单个工具 | - | `{ success: true, data: ToolConfig }` |
-| POST | `/api/tools` | 创建工具 | `Partial<ToolConfig>` | `{ success: true, data: ToolConfig, message: string }` |
-| PUT | `/api/tool?id={id}` | 更新工具 | `Partial<ToolConfig>` | `{ success: true, data: ToolConfig, message: string }` |
-| DELETE | `/api/tool?id={id}` | 删除工具 | - | `{ success: true, message: string }` |
-| POST | `/api/tools/import` | 批量导入工具 | `{ tools: ToolConfig[] }` | `{ success: true, data: ToolConfig[], message: string }` |
-| GET | `/api/tools/export` | 导出工具 | - | `Blob (JSON file)` |
-| GET | `/api/tools/inheritable` | 获取可继承工具 | - | `{ success: true, data: ToolConfig[] }` |
-| POST | `/api/tool/execute?id={id}` | 执行工具 | `{ params: Record<string, any> }` | `{ success: true, data: any, execution_time?: string }` |
+| GET | `/tools` | 获取工具列表 | - | `{ success: true, data: { tools: ToolConfig[], total: number } }` |
+| GET | `/tool?id={id}` | 获取单个工具 | - | `{ success: true, data: ToolConfig }` |
+| POST | `/tools` | 创建工具 | `Partial<ToolConfig>` | `{ success: true, data: ToolConfig, message: string }` |
+| PUT | `/tool?id={id}` | 更新工具 | `Partial<ToolConfig>` | `{ success: true, data: ToolConfig, message: string }` |
+| DELETE | `/tool?id={id}` | 删除工具 | - | `{ success: true, message: string }` |
+| POST | `/tools/import` | 批量导入工具 | `{ tools: ToolConfig[] }` | `{ success: true, data: ToolConfig[], message: string }` |
+| GET | `/tools/export` | 导出工具 | - | `Blob (JSON file)` |
+| GET | `/tools/inheritable` | 获取可继承工具 | - | `{ success: true, data: ToolConfig[] }` |
+| POST | `/tool/execute?id={id}` | 执行工具 | `{ params: Record<string, any> }` | `{ success: true, data: any, execution_time?: string }` |
 
-### ToolConfig 数据结构
+### 响应格式规范
+
+所有 API 响应统一使用包装格式：
+
+```typescript
+interface ApiResponse<T> {
+  success: boolean;   // 操作是否成功
+  data: T;            // 响应数据
+  message?: string;   // 提示信息
+  error?: string;     // 错误信息
+}
+```
+
+**前端接收处理**：
+
+```typescript
+// API 函数示例
+export async function getTools(): Promise<ToolConfig[]> {
+  const response = await request.get<ApiResponse<ToolListResponse>>(API_BASE);
+  return response.data.data || [];  // 提取 data 中的 tools 数组
+}
+
+export async function getTool(id: number): Promise<ToolConfig | null> {
+  const response = await request.get<ApiResponse<ToolConfig>>(`${API_BASE}/tool?id=${id}`);
+  return response.data.data || null;
+}
+```
+
+### 数据结构
 
 ```typescript
 interface ToolConfig {
@@ -178,18 +179,22 @@ interface ToolParameter {
 
 ### Mock 数据格式（handlers.ts）
 
-编写 MSW Handler 时必须使用 `ApiResponse` 包装格式：
+Mock 响应必须使用与真实 API 相同的包装格式：
 
 ```typescript
-// 正确示例
-http.get('/api/tools', () => {
+// handlers.ts
+import { http } from 'msw';
+
+// 正确示例 - 集合操作
+http.get('/tools', () => {
   return HttpResponse.json({
     success: true,
     data: { tools: mockTools, total: mockTools.length }
   })
 }),
 
-http.get('/api/tools/inheritable', () => {
+// 正确示例 - 二级路由
+http.get('/tools/inheritable', () => {
   return HttpResponse.json({
     success: true,
     data: mockTools.filter((t: any) => t.is_active)
@@ -197,22 +202,18 @@ http.get('/api/tools/inheritable', () => {
 }),
 
 // 错误示例（不要直接返回数组）
-http.get('/api/tools', () => {
+http.get('/tools', () => {
   return HttpResponse.json(mockTools)  // ❌ 缺少 success 和 data 包装
 })
 ```
 
-## 环境变量 (Environment Variables)
+### Mock 文件说明
 
-| 变量 | 说明 | 默认值 |
-|------|------|--------|
-| `VITE_API_TARGET` | 真实 API 目标地址 | `http://localhost:8000` |
-| `VITE_USE_MOCK` | 是否启用 MSW Mock | `false` |
-
-### .env vs .env.mock
-
-- `.env`: 真实 API 模式
-- `.env.mock`: Mock 模式（VITE_USE_MOCK=true）
+| 文件 | 说明 |
+|------|------|
+| `src/mocks/handlers.ts` | MSW 请求处理器定义 |
+| `src/mocks/mockUser.ts` | Mock 用户数据 |
+| `src/mocks/server.ts` | MSW 服务初始化 |
 
 ## 设计风格 (Design Style)
 
@@ -281,20 +282,21 @@ $panel-header-h: 48px;       // 顶部条高度
 
 // --- 按钮与输入框 (Component Tokens) ---
 $btn-height: 40px;           //
-$btn-padding-x: 16px;        
+$btn-padding-x: 16px;
 $btn-border-radius-pill: 20px;
 $input-border-radius: 12px;  // 搜索框采用大圆角矩形
 ```
 
 ### 按钮风格 (Button Style)
 
-属性,修改/补充值,说明
-形状,pill,
-高度,40px,
-阴影,inset 0 0 0 1px $border-base,使用内阴影模拟边框，更显精致
-间距,gap: 6px,图标与文字间距微调
-字体,500 (Medium),按钮文字比正文略重，提升引导性
-过渡,"all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",模拟 AI 产品丝滑的反馈感
+| 属性 | 修改/补充值 | 说明 |
+|------|------------|------|
+| 形状 | pill | |
+| 高度 | 40px | |
+| 阴影 | `inset 0 0 0 1px $border-base` | 使用内阴影模拟边框，更显精致 |
+| 间距 | gap: 6px | 图标与文字间距微调 |
+| 字体 | 500 (Medium) | 按钮文字比正文略重，提升引导性 |
+| 过渡 | `all 0.2s cubic-bezier(0.4, 0, 0.2, 1)` | 模拟 AI 产品丝滑的反馈感 |
 
 ### 按钮工具类
 
@@ -339,3 +341,4 @@ $input-border-radius: 12px;  // 搜索框采用大圆角矩形
 | 2026-02-06 | 设计风格 | 引入飞书多维表格设计风格 |
 | 2026-02-06 | 新增页面 | 新增工作台页面 |
 | 2026-02-06 | 设计风格 | 更新为 Manus AI 浅色主题风格 |
+| 2026-02-09 | API 规范 | 整合 API 路径规则到 toolConfig.ts，完善响应格式规范 |

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import type { ToolConfig, ToolParameter } from '@/types/tool';
+import type { ToolConfig } from '@/types/tool';
 import { useToolStore } from '@/stores/toolStore';
 import ToolCard from '@/components/ToolCard.vue';
 import ToolListFilter from '@/components/ToolListFilter.vue';
@@ -132,6 +132,11 @@ const handleTest = (tool: ToolConfig) => {
   showDebugPanel.value = true;
 };
 
+const closeEditDialog = () => {
+  editingTool.value = null;
+  isCreating.value = false;
+};
+
 const handleImport = async (tools: ToolConfig[]) => {
   const success = await store.importToolsFromFile(
     new File([JSON.stringify(tools)], 'import.json', { type: 'application/json' })
@@ -166,184 +171,205 @@ onMounted(async () => {
   ]);
 });
 
-// 响应式布局
-const mainPadding = computed(() => showDebugPanel.value ? '0' : '0');
+// 全屏状态
+const isFullscreen = ref(false);
+
+const toggleFullscreen = () => {
+  isFullscreen.value = !isFullscreen.value;
+};
 </script>
 
 <template>
   <div class="tool-management">
-    <!-- 顶部筛选栏（编辑模式下隐藏） -->
+    <!-- 顶部筛选栏 -->
     <ToolListFilter
-      v-if="!editingTool"
       @create="startEdit()"
       @import="showImportDialog = true"
       @export="handleExport"
     />
 
     <!-- 主体内容 -->
-    <div class="content-wrapper" :style="{ paddingRight: mainPadding }">
-      <!-- 工具列表 -->
-      <div v-if="!editingTool" class="tool-list">
-        <div v-if="store.loading" class="loading-state">
-          <svg class="spinner" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
-            <path d="M12 2a10 10 0 0 1 10 10"/>
-          </svg>
-          <p>加载中...</p>
-        </div>
-
-        <div v-else-if="store.filteredTools.length === 0" class="empty-state">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-          </svg>
-          <h3>暂无工具</h3>
-          <p>点击上方"新建工具"按钮创建第一个工具</p>
-        </div>
-
-        <div v-else class="tool-grid">
-          <ToolCard
-            v-for="tool in store.filteredTools"
-            :key="tool.id"
-            :tool="tool"
-            @test="handleTest"
-            @edit="startEdit($event)"
-            @duplicate="handleDuplicate"
-            @delete="handleDelete"
-          />
-        </div>
+    <div class="content-wrapper">
+      <!-- 加载状态 -->
+      <div v-if="store.loading" class="loading-state">
+        <svg class="spinner" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+          <path d="M12 2a10 10 0 0 1 10 10"/>
+        </svg>
+        <p>加载中...</p>
       </div>
 
-      <!-- 编辑视图 -->
-      <div v-else class="edit-view">
-        <div class="edit-header">
-          <button class="back-btn" @click="editingTool = null">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="19" y1="12" x2="5" y2="12"/>
-              <polyline points="12 19 5 12 12 5"/>
-            </svg>
-            返回列表
-          </button>
-          <div class="edit-actions">
-            <span v-if="isCreating" class="edit-badge creating">新建工具</span>
-            <span v-else class="edit-badge editing">编辑工具</span>
-            <button class="manus-btn" @click="saveTool">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                <polyline points="17 21 17 13 7 13 7 21"/>
-                <polyline points="7 3 7 8 15 8"/>
-              </svg>
-              保存
-            </button>
-          </div>
-        </div>
+      <!-- 空状态 -->
+      <div v-else-if="store.filteredTools.length === 0" class="empty-state">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+        <h3>暂无工具</h3>
+        <p>点击上方"新建工具"按钮创建第一个工具</p>
+      </div>
 
-        <div class="edit-content">
-          <!-- 左侧：代码编辑器 -->
-          <div class="editor-section">
-            <ToolEditor
-              v-model="editForm.code!"
-              language="javascript"
-              height="calc(100vh - 220px)"
-            />
-
-            <!-- 继承信息 -->
-            <div v-if="store.inheritableTools.length > 0" class="inherit-info">
-              <label>继承自:</label>
-              <select v-model="editForm.inherit_from" class="inherit-select">
-                <option value="">无</option>
-                <option
-                  v-for="tool in store.inheritableTools"
-                  :key="tool.id"
-                  :value="tool.name"
-                >
-                  {{ tool.name }}
-                </option>
-              </select>
-              <button
-                v-if="editForm.inherit_from"
-                class="manus-btn sync-btn"
-                @click="syncParameters"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="23 4 23 10 17 10"/>
-                  <polyline points="1 20 1 14 7 14"/>
-                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-                </svg>
-                同步参数
-              </button>
-            </div>
-          </div>
-
-          <!-- 右侧：配置面板 -->
-          <div class="config-section">
-            <!-- 基本信息 -->
-            <div class="config-card">
-              <h4>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="3"/>
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                </svg>
-                基本信息
-              </h4>
-
-              <div class="form-group">
-                <label>工具名称 <span class="required">*</span></label>
-                <input
-                  v-model="editForm.name"
-                  type="text"
-                  placeholder="请输入工具名称"
-                  class="form-input"
-                />
-              </div>
-
-              <div class="form-group">
-                <label>工具描述 <span class="required">*</span></label>
-                <textarea
-                  v-model="editForm.description"
-                  placeholder="请输入工具描述"
-                  class="form-textarea"
-                  rows="3"
-                ></textarea>
-              </div>
-
-              <div class="form-group-inline">
-                <label class="checkbox-label">
-                  <input v-model="editForm.is_active" type="checkbox" />
-                  <span>启用此工具</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- 参数配置 -->
-            <ToolParamForm
-              v-model="editForm.parameters!"
-              :inherit-from="editForm.inherit_from"
-              @sync-params="syncParameters"
-            />
-
-            <!-- 调试按钮 -->
-            <div class="debug-card">
-              <button class="debug-btn" @click="showDebugPanel = true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polygon points="5 3 19 12 5 21 5 3"/>
-                </svg>
-                打开调试面板
-              </button>
-            </div>
-          </div>
-        </div>
+      <!-- 工具列表 -->
+      <div v-else class="tool-grid">
+        <ToolCard
+          v-for="tool in store.filteredTools"
+          :key="tool.id"
+          :tool="tool"
+          @test="handleTest"
+          @edit="startEdit($event)"
+          @duplicate="handleDuplicate"
+          @delete="handleDelete"
+        />
       </div>
     </div>
 
-    <!-- 调试面板 -->
-    <Transition name="slide">
-      <div v-if="showDebugPanel" class="debug-container">
-        <ToolDebugPanel
-          :tool="editingTool"
-          @close="showDebugPanel = false"
-        />
-      </div>
-    </Transition>
+    <!-- 编辑弹框 -->
+    <Teleport to="body">
+      <Transition name="dialog">
+        <div v-if="editingTool" class="edit-dialog-overlay" :class="{ 'is-fullscreen': isFullscreen }" @click.self="closeEditDialog">
+          <div class="edit-dialog" :class="{ 'is-fullscreen': isFullscreen }">
+            <!-- 弹框头部 -->
+            <div class="dialog-header">
+              <h3>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                </svg>
+                {{ isCreating ? '新建工具' : '编辑工具' }}
+              </h3>
+              <div class="header-actions">
+                <button class="icon-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏' : '全屏'">
+                  <svg v-if="!isFullscreen" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                  </svg>
+                  <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+                  </svg>
+                </button>
+                <button class="close-btn" @click="closeEditDialog">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- 弹框内容 -->
+            <div class="dialog-content">
+              <!-- 左侧：代码编辑器 -->
+              <div class="editor-section">
+                <ToolEditor
+                  v-model="editForm.code!"
+                  language="javascript"
+                  height="400px"
+                />
+
+                <!-- 继承信息 -->
+                <div v-if="store.inheritableTools.length > 0" class="inherit-info">
+                  <label>继承自:</label>
+                  <select v-model="editForm.inherit_from" class="inherit-select">
+                    <option value="">无</option>
+                    <option
+                      v-for="tool in store.inheritableTools"
+                      :key="tool.id"
+                      :value="tool.name"
+                    >
+                      {{ tool.name }}
+                    </option>
+                  </select>
+                  <button
+                    v-if="editForm.inherit_from"
+                    class="manus-btn sync-btn"
+                    @click="syncParameters"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="23 4 23 10 17 10"/>
+                      <polyline points="1 20 1 14 7 14"/>
+                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                    同步参数
+                  </button>
+                </div>
+              </div>
+
+              <!-- 右侧：配置面板 -->
+              <div class="config-section">
+                <!-- 基本信息 -->
+                <div class="config-card">
+                  <h4>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    基本信息
+                  </h4>
+
+                  <div class="form-group">
+                    <label>工具名称 <span class="required">*</span></label>
+                    <input
+                      v-model="editForm.name"
+                      type="text"
+                      placeholder="请输入工具名称"
+                      class="form-input"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label>工具描述 <span class="required">*</span></label>
+                    <textarea
+                      v-model="editForm.description"
+                      placeholder="请输入工具描述"
+                      class="form-textarea"
+                      rows="3"
+                    ></textarea>
+                  </div>
+
+                  <div class="form-group-inline">
+                    <label class="checkbox-label">
+                      <input v-model="editForm.is_active" type="checkbox" />
+                      <span>启用此工具</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 参数配置 -->
+                <ToolParamForm
+                  v-model="editForm.parameters!"
+                  :inherit-from="editForm.inherit_from"
+                  @sync-params="syncParameters"
+                />
+              </div>
+            </div>
+
+            <!-- 弹框底部 -->
+            <div class="dialog-footer">
+              <button class="manus-btn" @click="closeEditDialog">取消</button>
+              <button class="save-btn" @click="saveTool">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                  <polyline points="17 21 17 13 7 13 7 21"/>
+                  <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                保存
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- 调试弹框 -->
+    <Teleport to="body">
+      <Transition name="dialog">
+        <div v-if="showDebugPanel" class="debug-dialog-overlay" @click.self="showDebugPanel = false">
+          <div class="debug-dialog">
+            <ToolDebugPanel
+              :tool="editingTool"
+              @close="showDebugPanel = false"
+            />
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
 
     <!-- 导入对话框 -->
     <ToolImportDialog
@@ -686,5 +712,209 @@ const mainPadding = computed(() => showDebugPanel.value ? '0' : '0');
   .debug-container {
     width: 100%;
   }
+}
+
+/* ========== 编辑弹框样式 ========== */
+.edit-dialog-overlay,
+.debug-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.edit-dialog {
+  width: 90%;
+  max-width: 1200px;
+  max-height: 85vh;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.debug-dialog {
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dialog-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.close-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8e8e93;
+  transition: all 0.15s ease;
+}
+
+.close-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #37352f;
+}
+
+.dialog-content {
+  flex: 1;
+  display: flex;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.dialog-content .editor-section {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-content .config-section {
+  width: 380px;
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fafafa;
+}
+
+.save-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: #007aff;
+  border: none;
+  border-radius: 20px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-btn:hover {
+  background: #0066d6;
+}
+
+/* 弹框动画 */
+.dialog-enter-active,
+.dialog-leave-active {
+  transition: all 0.2s ease;
+}
+
+.dialog-enter-from,
+.dialog-leave-to {
+  opacity: 0;
+}
+
+.dialog-enter-from .edit-dialog,
+.dialog-leave-to .edit-dialog {
+  transform: scale(0.95);
+}
+
+.dialog-enter-from .debug-dialog,
+.dialog-leave-to .debug-dialog {
+  transform: scale(0.95);
+}
+
+@media (max-width: 1024px) {
+  .edit-dialog {
+    width: 95%;
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+
+  .dialog-content {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .dialog-content .editor-section {
+    height: 300px;
+  }
+
+  .dialog-content .config-section {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* 全屏样式 */
+.edit-dialog-overlay.is-fullscreen {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.edit-dialog.is-fullscreen {
+  width: 100%;
+  max-width: 100%;
+  height: 100vh;
+  max-height: 100vh;
+  border-radius: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-actions .icon-btn,
+.header-actions .close-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8e8e93;
+  transition: all 0.15s ease;
+}
+
+.header-actions .icon-btn:hover,
+.header-actions .close-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #37352f;
 }
 </style>

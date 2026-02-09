@@ -53,32 +53,28 @@ const statusClass = computed(() => props.tool.is_active ? 'status-active' : 'sta
     </div>
 
     <div class="tool-actions">
-      <button class="manus-btn" @click="emit('test', tool)" title="测试">
+      <button class="icon-btn" @click="emit('test', tool)" title="测试">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="5 3 19 12 5 21 5 3"/>
         </svg>
-        测试
       </button>
-      <button class="manus-btn" @click="emit('edit', tool)" title="编辑">
+      <button class="icon-btn" @click="emit('edit', tool)" title="编辑">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
         </svg>
-        编辑
       </button>
-      <button class="manus-btn" @click="emit('duplicate', tool)" title="复制">
+      <button class="icon-btn" @click="emit('duplicate', tool)" title="复制">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
         </svg>
-        复制
       </button>
-      <button class="manus-btn btn-danger" @click="emit('delete', tool)" title="删除">
+      <button class="icon-btn btn-danger" @click="emit('delete', tool)" title="删除">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="3 6 5 6 21 6"/>
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
         </svg>
-        删除
       </button>
     </div>
   </div>
@@ -90,6 +86,8 @@ const statusClass = computed(() => props.tool.is_active ? 'status-active' : 'sta
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 12px;
   padding: 16px;
+  display: flex;
+  flex-direction: column;
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -161,7 +159,7 @@ const statusClass = computed(() => props.tool.is_active ? 'status-active' : 'sta
 .tool-meta {
   display: flex;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .meta-item {
@@ -174,23 +172,33 @@ const statusClass = computed(() => props.tool.is_active ? 'status-active' : 'sta
 
 .tool-actions {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.tool-actions .manus-btn {
-  flex: 1;
-  min-width: 70px;
+.icon-btn {
+  width: 32px;
   height: 32px;
-  padding: 6px 10px;
-  font-size: 12px;
+  border: none;
+  background: #f8f8f7;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7e7d7a;
+  transition: all 0.15s ease;
 }
 
-.btn-danger {
-  color: #ff3b30;
+.icon-btn:hover {
+  background: #f1f1f0;
+  color: #37352f;
 }
 
-.btn-danger:hover {
+.icon-btn.btn-danger:hover {
   background: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
 }
 </style>

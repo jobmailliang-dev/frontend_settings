@@ -138,7 +138,7 @@ export const handlers = [
   }),
 
   // Get single tool (使用查询参数)
-  http.get('/api/tool', ({ request }) => {
+  http.get('/api/tools', ({ request }) => {
     const url = new URL(request.url)
     const id = parseInt(url.searchParams.get('id') || '0')
     const tool = mockTools.find(t => t.id === id)
@@ -162,7 +162,7 @@ export const handlers = [
   }),
 
   // Update tool (使用查询参数)
-  http.put('/api/tool', async ({ request }) => {
+  http.put('/api/tools', async ({ request }) => {
     const url = new URL(request.url)
     const id = parseInt(url.searchParams.get('id') || '0')
     const body = await request.json()
@@ -175,7 +175,7 @@ export const handlers = [
   }),
 
   // Delete tool (使用查询参数)
-  http.delete('/api/tool', ({ request }) => {
+  http.delete('/api/tools', ({ request }) => {
     const url = new URL(request.url)
     const id = parseInt(url.searchParams.get('id') || '0')
     const index = mockTools.findIndex(t => t.id === id)
@@ -209,7 +209,7 @@ export const handlers = [
   }),
 
   // Execute tool (使用查询参数)
-  http.post('/api/tool/execute', async ({ request }) => {
+  http.post('/api/tools/execute', async ({ request }) => {
     const url = new URL(request.url)
     const id = parseInt(url.searchParams.get('id') || '0')
     // 模拟工具执行

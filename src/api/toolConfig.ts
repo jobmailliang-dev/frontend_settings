@@ -27,7 +27,7 @@ const API_BASE = '/tools';
 
 /**
  * 获取工具列表
- * GET /api/tools
+ * GET /tools
  * Response: { success: true, data: { tools: ToolConfig[], total: number } }
  */
 export async function getTools(): Promise<ToolConfig[]> {
@@ -37,17 +37,17 @@ export async function getTools(): Promise<ToolConfig[]> {
 
 /**
  * 获取单个工具
- * GET /api/tool?id={id}
+ * GET /tool?id={id}
  * Response: { success: true, data: ToolConfig }
  */
 export async function getTool(id: number): Promise<ToolConfig | null> {
-  const response = await request.get<ApiResponse<ToolConfig>>(`/api/tool?id=${id}`);
+  const response = await request.get<ApiResponse<ToolConfig>>(`${API_BASE}?id=${id}`);
   return response.data.data || null;
 }
 
 /**
  * 创建工具
- * POST /api/tools
+ * POST /tools
  * Body: Partial<ToolConfig>
  * Response: { success: true, data: ToolConfig, message: string }
  */
@@ -62,12 +62,12 @@ export async function createTool(tool: Partial<ToolConfig>): Promise<ToolOperati
 
 /**
  * 更新工具
- * PUT /api/tool?id={id}
+ * PUT /tool?id={id}
  * Body: Partial<ToolConfig>
  * Response: { success: true, data: ToolConfig, message: string }
  */
 export async function updateTool(id: number, tool: Partial<ToolConfig>): Promise<ToolOperationResult> {
-  const response = await request.put<ApiResponse<ToolConfig>>(`/api/tool?id=${id}`, tool);
+  const response = await request.put<ApiResponse<ToolConfig>>(`${API_BASE}?id=${id}`, tool);
   return {
     success: response.data.success,
     message: response.data.message || '更新成功',
@@ -77,11 +77,11 @@ export async function updateTool(id: number, tool: Partial<ToolConfig>): Promise
 
 /**
  * 删除工具
- * DELETE /api/tool?id={id}
+ * DELETE /tool?id={id}
  * Response: { success: true, message: string }
  */
 export async function deleteTool(id: number): Promise<ToolOperationResult> {
-  const response = await request.delete<ApiResponse<null>>(`/api/tool?id=${id}`);
+  const response = await request.delete<ApiResponse<null>>(`${API_BASE}?id=${id}`);
   return {
     success: response.data.success,
     message: response.data.message || '删除成功'
@@ -90,7 +90,7 @@ export async function deleteTool(id: number): Promise<ToolOperationResult> {
 
 /**
  * 批量导入工具
- * POST /api/tools/import
+ * POST /tools/import
  * Body: { tools: ToolConfig[] }
  * Response: { success: true, data: ToolConfig[], message: string }
  */
@@ -105,7 +105,7 @@ export async function importTools(tools: ToolConfig[]): Promise<ToolOperationRes
 
 /**
  * 导出工具
- * GET /api/tools/export
+ * GET /tools/export
  * Response: Blob (JSON file)
  */
 export async function exportTools(): Promise<Blob> {
@@ -117,7 +117,7 @@ export async function exportTools(): Promise<Blob> {
 
 /**
  * 获取可继承的工具列表（下拉选择用）
- * GET /api/tools/inheritable
+ * GET /tools/inheritable
  * Response: { success: true, data: ToolConfig[] }
  */
 export async function getInheritableTools(): Promise<ToolConfig[]> {
@@ -127,7 +127,7 @@ export async function getInheritableTools(): Promise<ToolConfig[]> {
 
 /**
  * 执行工具（流式）
- * POST /api/tool/execute?id={id}
+ * POST /tool/execute?id={id}
  * Body: { params: Record<string, any> }
  * Response: SSE stream
  */
@@ -138,7 +138,7 @@ export function executeToolStream(
   onError: (error: any) => void,
   onComplete: () => void
 ): () => void {
-  const eventSource = request.stream<ToolExecuteResponse>(`/api/tool/execute?id=${toolId}`, params);
+  const eventSource = request.stream<ToolExecuteResponse>(`${API_BASE}/execute?id=${toolId}`, params);
 
   eventSource.onmessage = (event) => {
     try {
@@ -164,7 +164,7 @@ export function executeToolStream(
 
 /**
  * 执行工具（Promise 方式）
- * POST /api/tool/execute?id={id}
+ * POST /tool/execute?id={id}
  * Body: { params: Record<string, any> }
  * Response: { success: true, data: any, execution_time?: string }
  */
@@ -172,7 +172,7 @@ export async function executeTool(
   toolId: number,
   params: ToolExecuteRequest
 ): Promise<ToolExecuteResponse> {
-  const response = await request.post<ApiResponse<ToolExecuteResponse>>(`/api/tool/execute?id=${toolId}`, params);
+  const response = await request.post<ApiResponse<ToolExecuteResponse>>(`${API_BASE}/execute?id=${toolId}`, params);
   return response.data.data;
 }
 
