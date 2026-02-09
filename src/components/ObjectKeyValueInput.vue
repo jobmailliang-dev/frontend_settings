@@ -126,11 +126,11 @@ const removeItem = (index: number) => {
 .object-item-input {
   flex: 1;
   min-width: 0;
-  height: 28px;
-  padding: 0 8px;
+  height: 32px;
+  padding: 0 10px;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: 6px;
+  font-size: 13px;
   background: #ffffff;
   outline: none;
 }
@@ -140,11 +140,11 @@ const removeItem = (index: number) => {
 }
 
 .object-item-remove {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   border: none;
   background: transparent;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -160,12 +160,12 @@ const removeItem = (index: number) => {
 
 .add-object-item-btn {
   width: 100%;
-  height: 28px;
+  height: 32px;
   border: 1px dashed rgba(0, 122, 255, 0.4);
-  border-radius: 4px;
+  border-radius: 6px;
   background: transparent;
   color: #007aff;
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;

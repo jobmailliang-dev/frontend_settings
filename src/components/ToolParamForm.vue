@@ -46,6 +46,11 @@ const removeParameter = (index: number) => {
   localParams.value.splice(index, 1);
 };
 
+const onTypeChange = (param: ToolParameter) => {
+  // 切换类型时清空默认值，避免类型不匹配导致的回显异常
+  param.default = undefined;
+};
+
 const emptyCount = computed(() => localParams.value.filter(p => !p.name).length);
 
 let draggedIndex: number | null = null;
@@ -144,7 +149,7 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
             <div class="param-field-row">
               <div class="param-field">
                 <label class="param-label">类型</label>
-                <select v-model="param.type" class="param-input">
+                <select v-model="param.type" class="param-input" @change="onTypeChange(param)">
                   <option v-for="t in parameterTypes" :key="t.value" :value="t.value">
                     {{ t.label }}
                   </option>
@@ -321,6 +326,7 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1;
 }
 
 .param-field-row {
@@ -373,13 +379,13 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
   cursor: pointer;
   accent-color: #007aff;
 }
-
 /* 对象类型键值对固定宽度 */
 .object-input-fixed {
   width: 240px;
   flex-shrink: 0;
 }
 
+/* 开关样式 */
 .switch {
   position: relative;
   width: 44px;
