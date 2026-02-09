@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import type { ToolParameter, ParameterType } from '@/types/tool';
 import ObjectKeyValueInput from './ObjectKeyValueInput.vue';
+import ListValueInput from './ListValueInput.vue';
 
 interface Props {
   modelValue: ToolParameter[];
@@ -49,6 +50,15 @@ const removeParameter = (index: number) => {
 const onTypeChange = (param: ToolParameter) => {
   // 切换类型时清空默认值，避免类型不匹配导致的回显异常
   param.default = undefined;
+  // 切换类型时清空枚举值（枚举只支持字符串和数字）
+  if (param.type !== 'string' && param.type !== 'number') {
+    param.enum = undefined;
+  }
+};
+
+// 判断类型是否支持枚举
+const supportsEnum = (param: ToolParameter) => {
+  return param.type === 'string' || param.type === 'number';
 };
 
 const emptyCount = computed(() => localParams.value.filter(p => !p.name).length);
@@ -146,27 +156,18 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
                 class="param-input"
               />
             </div>
-            <div class="param-field-row">
-              <div class="param-field">
-                <label class="param-label">类型</label>
-                <select v-model="param.type" class="param-input" @change="onTypeChange(param)">
-                  <option v-for="t in parameterTypes" :key="t.value" :value="t.value">
-                    {{ t.label }}
-                  </option>
-                </select>
-              </div>
-              <div class="param-field param-field-checkbox">
-                <label class="param-label">必填</label>
-                <input v-model="param.required" type="checkbox" class="checkbox-input" />
-              </div>
-            </div>
             <!-- 默认值 -->
             <div class="param-field-row">
               <div class="param-field">
                 <label class="param-label">默认值</label>
+                <!-- 数组类型使用列表输入 -->
+                <ListValueInput
+                  v-if="param.type === 'array'"
+                  v-model="param.default"
+                />
                 <!-- 对象类型使用键值对输入 -->
                 <ObjectKeyValueInput
-                  v-if="param.type === 'object'"
+                  v-else-if="param.type === 'object'"
                   v-model="param.default"
                   class="object-input-fixed"
                 />
@@ -183,6 +184,31 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
                   placeholder="默认值"
                   class="param-input"
                 />
+              </div>
+            </div>
+            <div class="param-field-row">
+              <div class="param-field">
+                <label class="param-label">类型</label>
+                <select v-model="param.type" class="param-input" @change="onTypeChange(param)">
+                  <option v-for="t in parameterTypes" :key="t.value" :value="t.value">
+                    {{ t.label }}
+                  </option>
+                </select>
+              </div>
+              <div class="param-field param-field-checkbox">
+                <label class="param-label">必填</label>
+                <input v-model="param.required" type="checkbox" class="checkbox-input" />
+              </div>
+              <div v-if="supportsEnum(param)" class="param-field param-field-checkbox">
+                <label class="param-label">枚举</label>
+                <input v-model="param.hasEnum" type="checkbox" class="checkbox-input" />
+              </div>
+            </div>
+            <!-- 枚举值输入（仅字符串和数字类型可用） -->
+            <div v-if="param.hasEnum && supportsEnum(param)" class="param-field-row enum-field-row">
+              <div class="param-field">
+                <label class="param-label">枚举值</label>
+                <ListValueInput v-model="param.enum" />
               </div>
             </div>
           </div>
@@ -337,6 +363,12 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
 
 .param-field-checkbox {
   flex-shrink: 0;
+}
+
+.enum-field-row {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.08);
 }
 
 .param-label {

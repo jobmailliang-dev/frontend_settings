@@ -13,6 +13,7 @@ export interface ToolParameter {
   required: boolean;
   default?: any;
   enum?: string[];
+  hasEnum?: boolean;
 }
 
 /** 工具配置 */
