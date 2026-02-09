@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import type { ToolParameter, ParameterType } from '@/types/tool';
+import ObjectKeyValueInput from './ObjectKeyValueInput.vue';
 
 interface Props {
   modelValue: ToolParameter[];
@@ -37,20 +38,12 @@ const addParameter = () => {
     description: '',
     type: 'string',
     required: false,
+    default: undefined,
   });
 };
 
 const removeParameter = (index: number) => {
   localParams.value.splice(index, 1);
-};
-
-const moveParameter = (index: number, direction: 'up' | 'down') => {
-  const newIndex = direction === 'up' ? index - 1 : index + 1;
-  if (newIndex >= 0 && newIndex < localParams.value.length) {
-    const temp = localParams.value[index];
-    localParams.value[index] = localParams.value[newIndex];
-    localParams.value[newIndex] = temp;
-  }
 };
 
 const emptyCount = computed(() => localParams.value.filter(p => !p.name).length);
@@ -160,6 +153,31 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
               <div class="param-field param-field-checkbox">
                 <label class="param-label">必填</label>
                 <input v-model="param.required" type="checkbox" class="checkbox-input" />
+              </div>
+            </div>
+            <!-- 默认值 -->
+            <div class="param-field-row">
+              <div class="param-field">
+                <label class="param-label">默认值</label>
+                <!-- 对象类型使用键值对输入 -->
+                <ObjectKeyValueInput
+                  v-if="param.type === 'object'"
+                  v-model="param.default"
+                  class="object-input-fixed"
+                />
+                <!-- 布尔类型使用开关 -->
+                <label v-else-if="param.type === 'boolean'" class="switch">
+                  <input type="checkbox" v-model="param.default" />
+                  <span class="slider"></span>
+                </label>
+                <!-- 其他类型使用输入框 -->
+                <input
+                  v-else
+                  v-model="param.default"
+                  type="text"
+                  placeholder="默认值"
+                  class="param-input"
+                />
               </div>
             </div>
           </div>
@@ -316,7 +334,7 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
 }
 
 .param-label {
-  width: 30px;
+  width: 40px;
   flex-shrink: 0;
   font-size: 12px;
   color: #7e7d7a;
@@ -354,6 +372,54 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
   height: 18px;
   cursor: pointer;
   accent-color: #007aff;
+}
+
+/* 对象类型键值对固定宽度 */
+.object-input-fixed {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .slider {
+  position: absolute;
+  inset: 0;
+  background-color: #e9e9e9;
+  border-radius: 24px;
+  transition: 0.3s;
+}
+
+.switch .slider::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.switch input:checked + .slider {
+  background-color: #34c759;
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(20px);
 }
 
 .param-actions {

@@ -22,16 +22,50 @@ const defaultParams = computed(() => {
 
   const params: Record<string, any> = {};
   props.tool.parameters.forEach(p => {
-    if (p.default !== undefined) {
-      params[p.name] = p.default;
-    } else if (p.type === 'array') {
-      params[p.name] = [];
-    } else if (p.type === 'object') {
-      params[p.name] = {};
-    } else if (p.type === 'boolean') {
-      params[p.name] = false;
+    // 优先使用默认值
+    if (p.default !== undefined && p.default !== '') {
+      if (p.type === 'boolean') {
+        params[p.name] = p.default === 'true' || p.default === true;
+      } else if (p.type === 'number' || p.type === 'integer') {
+        const numValue = parseFloat(p.default);
+        params[p.name] = isNaN(numValue) ? '' : numValue;
+      } else if (p.type === 'object') {
+        // 对象类型：处理数组格式（来自 ObjectKeyValueInput）或对象格式
+        if (Array.isArray(p.default)) {
+          const obj: Record<string, any> = {};
+          p.default.forEach((item: any) => {
+            if (item.key && item.key.trim() !== '') {
+              let parsedValue = item.value;
+              try {
+                parsedValue = JSON.parse(item.value);
+              } catch {
+                // 不是有效JSON，保持原字符串
+              }
+              obj[item.key] = parsedValue;
+            }
+          });
+          params[p.name] = obj;
+        } else if (typeof p.default === 'object' && p.default !== null) {
+          params[p.name] = p.default;
+        } else {
+          params[p.name] = {};
+        }
+      } else {
+        params[p.name] = p.default;
+      }
     } else {
-      params[p.name] = '';
+      // 没有默认值时，根据类型初始化
+      if (p.type === 'array') {
+        params[p.name] = [];
+      } else if (p.type === 'object') {
+        params[p.name] = {};
+      } else if (p.type === 'boolean') {
+        params[p.name] = false;
+      } else if (p.type === 'number' || p.type === 'integer') {
+        params[p.name] = '';
+      } else {
+        params[p.name] = '';
+      }
     }
   });
   return params;
@@ -67,22 +101,50 @@ const examplePayload = computed(() => {
   if (!props.tool?.parameters) return '{}';
   const example: Record<string, any> = {};
   props.tool.parameters.forEach(p => {
-    switch (p.type) {
-      case 'string':
-        example[p.name] = `示例${p.name}`;
-        break;
-      case 'number':
-        example[p.name] = 42;
-        break;
-      case 'boolean':
-        example[p.name] = true;
-        break;
-      case 'array':
-        example[p.name] = [`item1`, `item2`];
-        break;
-      case 'object':
-        example[p.name] = { key: `value` };
-        break;
+    // 优先使用默认值
+    if (p.default !== undefined && p.default !== '') {
+      if (p.type === 'boolean') {
+        example[p.name] = p.default === 'true' || p.default === true;
+      } else if (p.type === 'number' || p.type === 'integer') {
+        const numValue = parseFloat(p.default);
+        example[p.name] = isNaN(numValue) ? 42 : numValue;
+      } else if (p.type === 'object') {
+        if (Array.isArray(p.default)) {
+          const obj: Record<string, any> = {};
+          p.default.forEach((item: any) => {
+            if (item.key) {
+              obj[item.key] = item.value || 'value';
+            }
+          });
+          example[p.name] = Object.keys(obj).length > 0 ? obj : { key: 'value' };
+        } else if (typeof p.default === 'object') {
+          example[p.name] = p.default;
+        } else {
+          example[p.name] = { key: 'value' };
+        }
+      } else {
+        example[p.name] = p.default;
+      }
+    } else {
+      // 没有默认值时使用示例值
+      switch (p.type) {
+        case 'string':
+          example[p.name] = `示例${p.name}`;
+          break;
+        case 'number':
+        case 'integer':
+          example[p.name] = 42;
+          break;
+        case 'boolean':
+          example[p.name] = true;
+          break;
+        case 'array':
+          example[p.name] = [`item1`, `item2`];
+          break;
+        case 'object':
+          example[p.name] = { key: `value` };
+          break;
+      }
     }
   });
   return JSON.stringify(example, null, 2);
@@ -119,6 +181,10 @@ const clearResult = () => {
   result.value = '';
   executionTime.value = '';
 };
+
+const resetToDefaults = () => {
+  paramsJson.value = JSON.stringify(defaultParams.value, null, 2);
+};
 </script>
 
 <template>
@@ -143,11 +209,18 @@ const clearResult = () => {
         <div class="section-header">
           <span>输入参数 (JSON)</span>
           <div class="header-actions">
+            <button class="manus-btn" @click="resetToDefaults" title="重置为默认值">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+              默认值
+            </button>
             <button class="manus-btn" @click="loadExample">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polygon points="5 3 19 12 5 21 5 3"/>
               </svg>
-              示例载荷
+              示例
             </button>
             <button class="manus-btn" @click="paramsJson = '{}'">清空</button>
           </div>
