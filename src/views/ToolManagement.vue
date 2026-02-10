@@ -7,6 +7,7 @@ import { useToolStore } from '@/stores/toolStore';
 import ToolCard from '@/components/ToolCard.vue';
 import ToolListFilter from '@/components/ToolListFilter.vue';
 import ToolImportDialog from '@/components/ToolImportDialog.vue';
+import ToolDebugPanel from '@/components/ToolDebugPanel.vue';
 
 const router = useRouter();
 const store = useToolStore();
@@ -156,6 +157,16 @@ onMounted(async () => {
       v-model="showImportDialog"
       @import="handleImport"
     />
+
+    <!-- 调试面板 -->
+    <div v-if="showDebugPanel" class="debug-panel-overlay">
+      <div class="debug-panel-wrapper">
+        <ToolDebugPanel
+          :tool="debugTool"
+          @close="closeDebugPanel"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -215,5 +226,32 @@ onMounted(async () => {
 .empty-state p {
   margin: 0;
   font-size: 13px;
+}
+
+/* 调试面板遮罩 */
+.debug-panel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.debug-panel-wrapper {
+  width: 500px;
+  height: 100%;
+  background: #ffffff;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 </style>

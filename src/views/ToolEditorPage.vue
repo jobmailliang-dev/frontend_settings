@@ -119,10 +119,10 @@ const initDebugParams = () => {
 const loadTool = async () => {
   loading.value = true;
   try {
-    const id = route.query.id;
+    const id = route.params.id;
     if (id) {
       toolId.value = parseInt(id as string);
-      const tool = await store.getTool(toolId.value);
+      const tool = await store.loadTool(toolId.value);
       if (tool) {
         editForm.value = { ...tool, parameters: [...(tool.parameters || [])] };
         isCreating.value = false;
