@@ -108,7 +108,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="tool-management">
+  <div class="tool-management page-container">
     <!-- 顶部筛选栏 -->
     <ToolListFilter
       @create="handleCreate"
@@ -165,12 +165,6 @@ onMounted(async () => {
   flex-direction: column;
   height: calc(100vh - 156px);
   background: #ffffff;
-}
-
-.content-wrapper {
-  flex: 1;
-  overflow-y: auto;
-  transition: padding-right 0.3s ease;
 }
 
 .tool-grid {

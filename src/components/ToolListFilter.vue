@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useToolStore } from '@/stores/toolStore';
+import PageToolbar from '@/components/PageToolbar.vue';
 
 const store = useToolStore();
 const searchInput = ref(store.filter.search || '');
@@ -21,75 +22,81 @@ const clearFilter = () => {
 </script>
 
 <template>
-  <div class="tool-filter">
-    <div class="search-box">
-      <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="11" cy="11" r="8"/>
-        <path d="M21 21l-4.35-4.35"/>
-      </svg>
-      <input
-        v-model="searchInput"
-        type="text"
-        placeholder="搜索工具名称或描述..."
-        class="search-input"
-      />
-      <button v-if="searchInput" class="clear-btn" @click="searchInput = ''">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M15 9l-6 6M9 9l6 6"/>
-        </svg>
-      </button>
-    </div>
+  <div class="tool-filter-wrapper">
+    <PageToolbar>
+      <!-- 左侧：搜索框 + 筛选 -->
+      <template #left>
+        <div class="search-box">
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+          </svg>
+          <input
+            v-model="searchInput"
+            type="text"
+            placeholder="搜索工具名称或描述..."
+            class="search-input"
+          />
+          <button v-if="searchInput" class="clear-btn" @click="searchInput = ''">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M15 9l-6 6M9 9l6 6"/>
+            </svg>
+          </button>
+        </div>
 
-    <div class="filter-group">
-      <button
-        :class="['filter-btn', { active: statusFilter === 'all' }]"
-        @click="statusFilter = 'all'"
-      >
-        全部
-        <span class="count">{{ store.tools.length }}</span>
-      </button>
-      <button
-        :class="['filter-btn', { active: statusFilter === 'active' }]"
-        @click="statusFilter = 'active'"
-      >
-        活跃
-        <span class="count">{{ store.activeToolsCount }}</span>
-      </button>
-      <button
-        :class="['filter-btn', { active: statusFilter === 'inactive' }]"
-        @click="statusFilter = 'inactive'"
-      >
-        停用
-        <span class="count">{{ store.inactiveToolsCount }}</span>
-      </button>
-    </div>
+        <div class="filter-group">
+          <button
+            :class="['filter-btn', { active: statusFilter === 'all' }]"
+            @click="statusFilter = 'all'"
+          >
+            全部
+            <span class="count">{{ store.tools.length }}</span>
+          </button>
+          <button
+            :class="['filter-btn', { active: statusFilter === 'active' }]"
+            @click="statusFilter = 'active'"
+          >
+            活跃
+            <span class="count">{{ store.activeToolsCount }}</span>
+          </button>
+          <button
+            :class="['filter-btn', { active: statusFilter === 'inactive' }]"
+            @click="statusFilter = 'inactive'"
+          >
+            停用
+            <span class="count">{{ store.inactiveToolsCount }}</span>
+          </button>
+        </div>
+      </template>
 
-    <div class="actions">
-      <button class="manus-btn" @click="$emit('import')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        导入
-      </button>
-      <button class="manus-btn" @click="$emit('export')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/>
-          <line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-        导出
-      </button>
-      <button class="manus-btn primary" @click="$emit('create')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19"/>
-          <line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        新建工具
-      </button>
-    </div>
+      <!-- 右侧：操作按钮 -->
+      <template #right>
+        <button class="manus-btn" @click="$emit('import')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          导入
+        </button>
+        <button class="manus-btn" @click="$emit('export')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          导出
+        </button>
+        <button class="manus-btn primary" @click="$emit('create')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          新建工具
+        </button>
+      </template>
+    </PageToolbar>
   </div>
 </template>
 
@@ -100,13 +107,8 @@ export default {
 </script>
 
 <style scoped>
-.tool-filter {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
+.tool-filter-wrapper {
   background: #ffffff;
-  flex-wrap: wrap;
 }
 
 .search-box {
@@ -212,12 +214,6 @@ export default {
   background: #f1f1f0;
 }
 
-.actions {
-  display: flex;
-  gap: 8px;
-  margin-left: auto;
-}
-
 .manus-btn.primary {
   background: #007aff;
   border-color: #007aff;
@@ -231,26 +227,5 @@ export default {
 
 .manus-btn.primary .icon {
   color: #ffffff;
-}
-
-@media (max-width: 768px) {
-  .tool-filter {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .search-box {
-    max-width: none;
-  }
-
-  .filter-group {
-    order: 3;
-  }
-
-  .actions {
-    order: 2;
-    margin-left: 0;
-    justify-content: flex-end;
-  }
 }
 </style>

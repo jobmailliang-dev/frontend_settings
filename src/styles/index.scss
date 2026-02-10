@@ -131,3 +131,13 @@ html, body {
     color: $text-placeholder;
   }
 }
+
+// Content wrapper - 页面内容容器
+.content-wrapper {
+  width: 100%;
+}
+
+// Page container - 页面容器，用于统一左右内边距
+.page-container {
+  padding: 0 1.5rem;
+}

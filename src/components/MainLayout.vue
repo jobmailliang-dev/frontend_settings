@@ -433,7 +433,7 @@ const handleCommand = async (command: string) => {
 
 /* Main */
 .main {
-  padding: 32px;
+  padding: 0;
   background: transparent;
 }
 </style>

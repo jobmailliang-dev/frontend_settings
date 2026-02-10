@@ -8,6 +8,7 @@ import { useToolStore } from '@/stores/toolStore';
 import ToolEditor from '@/components/ToolEditor.vue';
 import ToolParamForm from '@/components/ToolParamForm.vue';
 import Console from '@/components/MonacoEditor/Console.vue';
+import PageToolbar from '@/components/PageToolbar.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -417,23 +418,25 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="tool-editor-page" :class="{ 'is-fullscreen': isFullscreen }">
+  <div class="tool-editor-page page-container" :class="{ 'is-fullscreen': isFullscreen }">
     <!-- 页面头部 -->
-    <div class="edit-header">
-      <div class="header-left">
-        <button class="icon-btn" @click="handleBack" title="返回工具列表">
+    <PageToolbar>
+      <template #left>
+        <button class="manus-btn" @click="handleBack">
           <el-icon><ArrowLeft /></el-icon>
+          返回
         </button>
-        <button class="icon-btn fullscreen-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏' : '全屏'">
+        <button class="manus-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏' : '全屏'">
           <svg v-if="!isFullscreen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
           </svg>
           <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
           </svg>
+          {{ isFullscreen ? '退出全屏' : '全屏' }}
         </button>
-      </div>
-      <div class="header-actions">
+      </template>
+      <template #right>
         <button class="manus-btn" @click="handleBack">取消</button>
         <button class="save-btn" @click="saveTool">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -443,8 +446,8 @@ onMounted(async () => {
           </svg>
           保存
         </button>
-      </div>
-    </div>
+      </template>
+    </PageToolbar>
 
     <!-- 主体内容 -->
     <div class="edit-content">
@@ -716,54 +719,8 @@ onMounted(async () => {
   to { transform: rotate(360deg); }
 }
 
-.edit-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 0 0;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.icon-btn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  border-radius: 6px;
-  color: #858481;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.icon-btn:hover {
-  background: rgba(0, 0, 0, 0.06);
-  color: #37352f;
-}
-
-.fullscreen-btn {
-  margin-left: 4px;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.header-actions .manus-btn {
-  height: 36px;
-  padding: 0 20px;
-}
-
-.header-actions .save-btn {
+/* 保存按钮 */
+.save-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -778,32 +735,14 @@ onMounted(async () => {
   transition: all 0.2s ease;
 }
 
-.header-actions .save-btn:hover {
+.save-btn:hover {
   background: #0066d6;
-}
-
-.edit-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.edit-badge.creating {
-  background: rgba(0, 122, 255, 0.1);
-  color: #007aff;
-}
-
-.edit-badge.editing {
-  background: rgba(52, 199, 89, 0.1);
-  color: #34c759;
 }
 
 .edit-content {
   flex: 1;
   display: flex;
   gap: 0;
-  padding: 24px 0 32px;
   overflow: hidden;
   width: 100%;
 }
