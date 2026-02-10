@@ -1361,6 +1361,62 @@ const toggleFullscreen = () => {
   padding: 4px;
 }
 
+/* Element Plus Tabs 样式定制 - 修复选中效果 */
+.config-section :deep(.el-tabs--border-card) {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: none;
+}
+
+.config-section :deep(.el-tabs__header) {
+  background: #fafafa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  margin: 0;
+}
+
+.config-section :deep(.el-tabs__nav-wrap::after) {
+  display: none;
+}
+
+.config-section :deep(.el-tabs__item) {
+  height: 40px;
+  line-height: 40px;
+  font-size: 14px;
+  color: #858481;
+  border: none !important;
+  transition: all 0.2s ease;
+}
+
+.config-section :deep(.el-tabs__item:hover) {
+  color: #37352f;
+}
+
+.config-section :deep(.el-tabs__item.is-active) {
+  color: #007aff !important;
+  background: #ffffff;
+  font-weight: 500;
+}
+
+.config-section :deep(.el-tabs__active-bar) {
+  background: #007aff;
+  height: 2px;
+}
+
+.config-section :deep(.el-tabs__content) {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #ffffff;
+}
+
+.config-section :deep(.el-tab-pane) {
+  height: 100%;
+}
+
 .debug-form {
   margin-bottom: 16px;
 }
