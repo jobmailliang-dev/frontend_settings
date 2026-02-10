@@ -2,16 +2,24 @@
 import { ref, watch, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Refresh } from '@element-plus/icons-vue';
-import type { ToolConfig, ToolParameter } from '@/types/tool';
+import type { ToolParameter } from '@/types/tool';
 import { toolConfigApi } from '@/api/toolConfig';
 import ObjectKeyValueInput from '@/components/ObjectKeyValueInput.vue';
 import ListValueInput from '@/components/ListValueInput.vue';
 
 interface Props {
-  tool: ToolConfig | null;
+  toolName?: string;
+  toolDescription?: string;
+  toolId?: number;
+  parameters?: ToolParameter[];
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  toolName: '',
+  toolDescription: '',
+  toolId: undefined,
+  parameters: () => []
+});
 const emit = defineEmits<{
   'close': [];
 }>();
@@ -26,8 +34,8 @@ const executionTime = ref('');
 const initDebugParams = () => {
   const params: Record<string, any> = {};
 
-  if (props.tool?.parameters) {
-    props.tool.parameters.forEach(param => {
+  if (props.parameters) {
+    props.parameters.forEach(param => {
       if (param.default !== undefined && param.default !== '') {
         if (param.type === 'boolean') {
           params[param.name] = param.default === 'true' || param.default === true;
@@ -81,35 +89,20 @@ const handleNumberInput = (paramName: string, value: string) => {
   debugParams.value[paramName] = finalValue;
 };
 
-// 检查必填参数
-const checkRequiredParams = () => {
-  if (!props.tool?.parameters) return true;
-
-  const missingParams = props.tool.parameters.filter(param => {
-    if (!param.required) return false;
-    const value = debugParams.value[param.name];
-    return value === undefined || value === '' || value === null;
-  });
-
-  if (missingParams.length > 0) {
-    const paramNames = missingParams.map(p => p.name).join('、');
-    ElMessage.warning(`请填写必填参数：${paramNames}`);
-    return false;
-  }
-
-  return true;
-};
+// 监听参数变化，初始化参数
+watch(() => props.parameters, () => {
+  initDebugParams();
+}, { immediate: true });
 
 // 将表单参数转换为JSON对象
 const convertParamsToJson = (): Record<string, any> => {
   const params: Record<string, any> = {};
 
-  if (props.tool?.parameters) {
-    props.tool.parameters.forEach(param => {
+  if (props.parameters) {
+    props.parameters.forEach(param => {
       let value = debugParams.value[param.name];
 
       if (param.type === 'object') {
-        // ObjectKeyValueInput 输出的是 KeyValueItem[] 数组
         if (Array.isArray(value)) {
           const newObject: Record<string, any> = {};
           value.forEach((item: any) => {
@@ -118,7 +111,6 @@ const convertParamsToJson = (): Record<string, any> => {
               try {
                 parsedValue = JSON.parse(item.value);
               } catch {
-                // 不是有效JSON，保持原字符串
               }
               newObject[item.key] = parsedValue;
             }
@@ -152,9 +144,28 @@ const formatResult = (data: any) => {
   }
 };
 
+// 检查必填参数
+const checkRequiredParams = () => {
+  if (!props.parameters) return true;
+
+  const missingParams = props.parameters.filter(param => {
+    if (!param.required) return false;
+    const value = debugParams.value[param.name];
+    return value === undefined || value === '' || value === null;
+  });
+
+  if (missingParams.length > 0) {
+    const paramNames = missingParams.map(p => p.name).join('、');
+    ElMessage.warning(`请填写必填参数：${paramNames}`);
+    return false;
+  }
+
+  return true;
+};
+
 // 执行工具
 const execute = async () => {
-  if (!checkRequiredParams() || !props.tool?.id) return;
+  if (!checkRequiredParams()) return;
 
   isExecuting.value = true;
   result.value = '';
@@ -163,7 +174,7 @@ const execute = async () => {
   try {
     const startTime = Date.now();
     const params = convertParamsToJson();
-    const response = await toolConfigApi.executeTool(props.tool.id, { params });
+    const response = await toolConfigApi.executeTool(props.toolId!, { params });
     result.value = formatResult(response);
     executionTime.value = response.execution_time || `${((Date.now() - startTime) / 1000).toFixed(3)}s`;
     ElMessage.success('执行成功');
@@ -178,15 +189,6 @@ const execute = async () => {
     isExecuting.value = false;
   }
 };
-
-// 监听工具变化，初始化参数
-watch(() => props.tool, () => {
-  if (props.tool) {
-    initDebugParams();
-    result.value = '';
-    executionTime.value = '';
-  }
-}, { immediate: true });
 </script>
 
 <template>
@@ -196,7 +198,7 @@ watch(() => props.tool, () => {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="5 3 19 12 5 21 5 3"/>
         </svg>
-        调试面板 - {{ tool?.name || '未知工具' }}
+        调试面板 - {{ toolName || '未知工具' }}
       </h4>
       <button class="close-btn" @click="$emit('close')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -208,8 +210,8 @@ watch(() => props.tool, () => {
 
     <div class="panel-content">
       <!-- 工具描述 -->
-      <div v-if="tool?.description" class="tool-desc">
-        {{ tool.description }}
+      <div v-if="toolDescription" class="tool-desc">
+        {{ toolDescription }}
       </div>
 
       <!-- 参数表单 -->
@@ -223,8 +225,8 @@ watch(() => props.tool, () => {
         </div>
 
         <!-- 有参数时显示表单 -->
-        <div v-if="tool?.parameters && tool.parameters.length > 0" class="params-form">
-          <div v-for="param in tool.parameters" :key="param.name" class="param-item">
+        <div v-if="parameters && parameters.length > 0" class="params-form">
+          <div v-for="param in parameters" :key="param.name" class="param-item">
             <label class="param-label">
               {{ param.name }}
               <span v-if="param.required" class="required-mark">*</span>
@@ -320,7 +322,7 @@ watch(() => props.tool, () => {
       <div class="actions-bar">
         <button
           class="execute-btn"
-          :disabled="isExecuting || !tool?.id"
+          :disabled="isExecuting || !toolId"
           @click="execute"
         >
           <svg v-if="!isExecuting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -572,6 +574,71 @@ watch(() => props.tool, () => {
   flex: 1;
 }
 
+/* Element Plus 样式定制 */
+.debug-panel :deep(.el-input__wrapper) {
+  background-color: #fafafa !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+.debug-panel :deep(.el-input__wrapper:hover) {
+  border-color: #007aff !important;
+}
+
+.debug-panel :deep(.el-input__wrapper.is-focus) {
+  border-color: #007aff !important;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.1) !important;
+}
+
+.debug-panel :deep(.el-input__inner) {
+  color: #37352f !important;
+  background-color: transparent !important;
+  font-size: 13px !important;
+}
+
+.debug-panel :deep(.el-input__inner::placeholder) {
+  color: #858481 !important;
+}
+
+.debug-panel :deep(.el-select .el-input__wrapper) {
+  background-color: #fafafa !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+.debug-panel :deep(.el-select-dropdown) {
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.debug-panel :deep(.el-select-dropdown__item) {
+  color: #37352f !important;
+  background-color: transparent !important;
+}
+
+.debug-panel :deep(.el-select-dropdown__item:hover) {
+  background-color: #f8f8f7 !important;
+}
+
+.debug-panel :deep(.el-select-dropdown__item.is-selected) {
+  background-color: rgba(0, 122, 255, 0.1) !important;
+  color: #007aff !important;
+}
+
+.debug-panel :deep(.el-switch__core) {
+  background-color: #e0e0de !important;
+  border-color: #e0e0de !important;
+}
+
+.debug-panel :deep(.el-switch.is-checked .el-switch__core) {
+  background-color: #34c759 !important;
+  border-color: #34c759 !important;
+}
+
 /* 操作栏 */
 .actions-bar {
   display: flex;
@@ -644,70 +711,5 @@ watch(() => props.tool, () => {
 .result-output code {
   white-space: pre-wrap;
   word-break: break-all;
-}
-
-/* Element Plus 样式定制 */
-.debug-panel :deep(.el-input__wrapper) {
-  background-color: #fafafa !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  border-radius: 6px !important;
-  box-shadow: none !important;
-}
-
-.debug-panel :deep(.el-input__wrapper:hover) {
-  border-color: #007aff !important;
-}
-
-.debug-panel :deep(.el-input__wrapper.is-focus) {
-  border-color: #007aff !important;
-  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.1) !important;
-}
-
-.debug-panel :deep(.el-input__inner) {
-  color: #37352f !important;
-  background-color: transparent !important;
-  font-size: 13px !important;
-}
-
-.debug-panel :deep(.el-input__inner::placeholder) {
-  color: #858481 !important;
-}
-
-.debug-panel :deep(.el-select .el-input__wrapper) {
-  background-color: #fafafa !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  border-radius: 6px !important;
-  box-shadow: none !important;
-}
-
-.debug-panel :deep(.el-select-dropdown) {
-  background-color: #ffffff !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  border-radius: 6px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-}
-
-.debug-panel :deep(.el-select-dropdown__item) {
-  color: #37352f !important;
-  background-color: transparent !important;
-}
-
-.debug-panel :deep(.el-select-dropdown__item:hover) {
-  background-color: #f8f8f7 !important;
-}
-
-.debug-panel :deep(.el-select-dropdown__item.is-selected) {
-  background-color: rgba(0, 122, 255, 0.1) !important;
-  color: #007aff !important;
-}
-
-.debug-panel :deep(.el-switch__core) {
-  background-color: #e0e0de !important;
-  border-color: #e0e0de !important;
-}
-
-.debug-panel :deep(.el-switch.is-checked .el-switch__core) {
-  background-color: #34c759 !important;
-  border-color: #34c759 !important;
 }
 </style>

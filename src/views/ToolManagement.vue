@@ -162,7 +162,10 @@ onMounted(async () => {
     <div v-if="showDebugPanel" class="debug-panel-overlay">
       <div class="debug-panel-wrapper">
         <ToolDebugPanel
-          :tool="debugTool"
+          :tool-name="debugTool?.name"
+          :tool-description="debugTool?.description"
+          :tool-id="debugTool?.id"
+          :parameters="debugTool?.parameters || []"
           @close="closeDebugPanel"
         />
       </div>
