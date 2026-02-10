@@ -156,6 +156,26 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
                 class="param-input"
               />
             </div>
+            
+            <div class="param-field-row">
+              <div class="param-field">
+                <label class="param-label">类型</label>
+                <select v-model="param.type" class="param-input" @change="onTypeChange(param)">
+                  <option v-for="t in parameterTypes" :key="t.value" :value="t.value">
+                    {{ t.label }}
+                  </option>
+                </select>
+              </div>
+              <div class="param-field param-field-checkbox">
+                <label class="param-label">必填</label>
+                <input v-model="param.required" type="checkbox" class="checkbox-input" />
+              </div>
+              <div v-if="supportsEnum(param)" class="param-field param-field-checkbox">
+                <label class="param-label">枚举</label>
+                <input v-model="param.hasEnum" type="checkbox" class="checkbox-input" />
+              </div>
+            </div>
+
             <!-- 默认值 -->
             <div class="param-field-row">
               <div class="param-field">
@@ -186,24 +206,7 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
                 />
               </div>
             </div>
-            <div class="param-field-row">
-              <div class="param-field">
-                <label class="param-label">类型</label>
-                <select v-model="param.type" class="param-input" @change="onTypeChange(param)">
-                  <option v-for="t in parameterTypes" :key="t.value" :value="t.value">
-                    {{ t.label }}
-                  </option>
-                </select>
-              </div>
-              <div class="param-field param-field-checkbox">
-                <label class="param-label">必填</label>
-                <input v-model="param.required" type="checkbox" class="checkbox-input" />
-              </div>
-              <div v-if="supportsEnum(param)" class="param-field param-field-checkbox">
-                <label class="param-label">枚举</label>
-                <input v-model="param.hasEnum" type="checkbox" class="checkbox-input" />
-              </div>
-            </div>
+
             <!-- 枚举值输入（仅字符串和数字类型，且启用枚举时显示） -->
             <div v-if="param.hasEnum" class="param-field-row enum-field-row">
               <div class="param-field">

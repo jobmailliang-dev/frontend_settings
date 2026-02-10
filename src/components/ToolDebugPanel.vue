@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
+import { ElMessage } from 'element-plus';
+import { Refresh } from '@element-plus/icons-vue';
 import type { ToolConfig, ToolParameter } from '@/types/tool';
 import { toolConfigApi } from '@/api/toolConfig';
+import ObjectKeyValueInput from '@/components/ObjectKeyValueInput.vue';
+import ListValueInput from '@/components/ListValueInput.vue';
 
 interface Props {
   tool: ToolConfig | null;
@@ -12,28 +16,103 @@ const emit = defineEmits<{
   'close': [];
 }>();
 
-const paramsJson = ref('{}');
+// 调试参数（表单方式）
+const debugParams = ref<Record<string, any>>({});
 const result = ref('');
 const isExecuting = ref(false);
 const executionTime = ref('');
 
-const defaultParams = computed(() => {
-  if (!props.tool?.parameters) return {};
-
+// 初始化调试参数
+const initDebugParams = () => {
   const params: Record<string, any> = {};
-  props.tool.parameters.forEach(p => {
-    // 优先使用默认值
-    if (p.default !== undefined && p.default !== '') {
-      if (p.type === 'boolean') {
-        params[p.name] = p.default === 'true' || p.default === true;
-      } else if (p.type === 'number' || p.type === 'integer') {
-        const numValue = parseFloat(p.default);
-        params[p.name] = isNaN(numValue) ? '' : numValue;
-      } else if (p.type === 'object') {
-        // 对象类型：处理数组格式（来自 ObjectKeyValueInput）或对象格式
-        if (Array.isArray(p.default)) {
-          const obj: Record<string, any> = {};
-          p.default.forEach((item: any) => {
+
+  if (props.tool?.parameters) {
+    props.tool.parameters.forEach(param => {
+      if (param.default !== undefined && param.default !== '') {
+        if (param.type === 'boolean') {
+          params[param.name] = param.default === 'true' || param.default === true;
+        } else if (param.type === 'number' || param.type === 'integer') {
+          const numValue = parseFloat(param.default);
+          params[param.name] = isNaN(numValue) ? '' : numValue;
+        } else if (param.type === 'object') {
+          if (typeof param.default === 'object' && param.default !== null && !Array.isArray(param.default)) {
+            params[param.name] = Object.entries(param.default).map(([key, value]) => ({
+              key,
+              value: typeof value === 'string' ? value : JSON.stringify(value)
+            }));
+          } else {
+            params[param.name] = [{ key: '', value: '' }];
+          }
+        } else {
+          params[param.name] = param.default;
+        }
+      } else {
+        if (param.type === 'boolean') {
+          params[param.name] = false;
+        } else if (param.type === 'array') {
+          params[param.name] = [];
+        } else if (param.type === 'object') {
+          params[param.name] = [{ key: '', value: '' }];
+        } else if (param.type === 'number' || param.type === 'integer') {
+          params[param.name] = '';
+        } else {
+          params[param.name] = '';
+        }
+      }
+    });
+  }
+
+  debugParams.value = params;
+};
+
+// 重置为默认值
+const resetToDefaults = () => {
+  initDebugParams();
+  ElMessage.success('参数已重置为默认值');
+};
+
+// 处理数字输入（限制只能输入数字）
+const handleNumberInput = (paramName: string, value: string) => {
+  const numericValue = value.replace(/[^0-9.-]/g, '');
+  const cleanValue = numericValue.replace(/-/g, (match, offset) => offset === 0 ? match : '');
+  const finalValue = cleanValue.replace(/\./g, (match, offset, string) => {
+    return string.indexOf('.') === offset ? match : '';
+  });
+  debugParams.value[paramName] = finalValue;
+};
+
+// 检查必填参数
+const checkRequiredParams = () => {
+  if (!props.tool?.parameters) return true;
+
+  const missingParams = props.tool.parameters.filter(param => {
+    if (!param.required) return false;
+    const value = debugParams.value[param.name];
+    return value === undefined || value === '' || value === null;
+  });
+
+  if (missingParams.length > 0) {
+    const paramNames = missingParams.map(p => p.name).join('、');
+    ElMessage.warning(`请填写必填参数：${paramNames}`);
+    return false;
+  }
+
+  return true;
+};
+
+// 将表单参数转换为JSON对象
+const convertParamsToJson = (): Record<string, any> => {
+  const params: Record<string, any> = {};
+
+  if (props.tool?.parameters) {
+    props.tool.parameters.forEach(param => {
+      let value = debugParams.value[param.name];
+
+      if (param.type === 'object') {
+        // ObjectKeyValueInput 输出的是 KeyValueItem[] 数组
+        if (Array.isArray(value)) {
+          const newObject: Record<string, any> = {};
+          value.forEach((item: any) => {
             if (item.key && item.key.trim() !== '') {
               let parsedValue = item.value;
               try {
@@ -41,150 +120,73 @@ const defaultParams = computed(() => {
               } catch {
                 // 不是有效JSON，保持原字符串
               }
-              obj[item.key] = parsedValue;
+              newObject[item.key] = parsedValue;
             }
           });
-          params[p.name] = obj;
-        } else if (typeof p.default === 'object' && p.default !== null) {
-          params[p.name] = p.default;
-        } else {
-          params[p.name] = {};
+          value = newObject;
         }
-      } else {
-        params[p.name] = p.default;
+      } else if (value === '') {
+        value = null;
+      } else if (param.type === 'number' && value !== null && value !== '') {
+        value = parseFloat(value);
+        if (isNaN(value)) value = null;
+      } else if (param.type === 'integer' && value !== null && value !== '') {
+        value = parseInt(value, 10);
+        if (isNaN(value)) value = null;
       }
-    } else {
-      // 没有默认值时，根据类型初始化
-      if (p.type === 'array') {
-        params[p.name] = [];
-      } else if (p.type === 'object') {
-        params[p.name] = {};
-      } else if (p.type === 'boolean') {
-        params[p.name] = false;
-      } else if (p.type === 'number' || p.type === 'integer') {
-        params[p.name] = '';
-      } else {
-        params[p.name] = '';
-      }
-    }
-  });
+
+      params[param.name] = value;
+    });
+  }
+
   return params;
-});
-
-watch(() => props.tool, (newTool) => {
-  if (newTool) {
-    paramsJson.value = JSON.stringify(defaultParams.value, null, 2);
-    result.value = '';
-    executionTime.value = '';
-  }
-}, { immediate: true });
-
-watch(paramsJson, (val) => {
-  // 实时验证 JSON 格式
-  try {
-    JSON.parse(val);
-  } catch {
-    // 暂时忽略无效 JSON
-  }
-});
-
-const isValidJson = computed(() => {
-  try {
-    JSON.parse(paramsJson.value);
-    return true;
-  } catch {
-    return false;
-  }
-});
-
-const examplePayload = computed(() => {
-  if (!props.tool?.parameters) return '{}';
-  const example: Record<string, any> = {};
-  props.tool.parameters.forEach(p => {
-    // 优先使用默认值
-    if (p.default !== undefined && p.default !== '') {
-      if (p.type === 'boolean') {
-        example[p.name] = p.default === 'true' || p.default === true;
-      } else if (p.type === 'number' || p.type === 'integer') {
-        const numValue = parseFloat(p.default);
-        example[p.name] = isNaN(numValue) ? 42 : numValue;
-      } else if (p.type === 'object') {
-        if (Array.isArray(p.default)) {
-          const obj: Record<string, any> = {};
-          p.default.forEach((item: any) => {
-            if (item.key) {
-              obj[item.key] = item.value || 'value';
-            }
-          });
-          example[p.name] = Object.keys(obj).length > 0 ? obj : { key: 'value' };
-        } else if (typeof p.default === 'object') {
-          example[p.name] = p.default;
-        } else {
-          example[p.name] = { key: 'value' };
-        }
-      } else {
-        example[p.name] = p.default;
-      }
-    } else {
-      // 没有默认值时使用示例值
-      switch (p.type) {
-        case 'string':
-          example[p.name] = `示例${p.name}`;
-          break;
-        case 'number':
-        case 'integer':
-          example[p.name] = 42;
-          break;
-        case 'boolean':
-          example[p.name] = true;
-          break;
-        case 'array':
-          example[p.name] = [`item1`, `item2`];
-          break;
-        case 'object':
-          example[p.name] = { key: `value` };
-          break;
-      }
-    }
-  });
-  return JSON.stringify(example, null, 2);
-});
-
-const loadExample = () => {
-  paramsJson.value = examplePayload.value;
 };
 
+// 格式化结果
+const formatResult = (data: any) => {
+  if (!data) return '';
+  try {
+    return JSON.stringify(data, null, 2);
+  } catch {
+    return String(data);
+  }
+};
+
+// 执行工具
 const execute = async () => {
-  if (!isValidJson.value || !props.tool?.id) return;
+  if (!checkRequiredParams() || !props.tool?.id) return;
 
   isExecuting.value = true;
   result.value = '';
+  executionTime.value = '';
 
   try {
     const startTime = Date.now();
-    const parsedParams = JSON.parse(paramsJson.value);
-    const response = await toolConfigApi.executeTool(props.tool.id, { params: parsedParams });
-    result.value = JSON.stringify(response, null, 2);
-    executionTime.value = `${((Date.now() - startTime) / 1000).toFixed(3)}s`;
+    const params = convertParamsToJson();
+    const response = await toolConfigApi.executeTool(props.tool.id, { params });
+    result.value = formatResult(response);
+    executionTime.value = response.execution_time || `${((Date.now() - startTime) / 1000).toFixed(3)}s`;
+    ElMessage.success('执行成功');
   } catch (e: any) {
-    result.value = JSON.stringify({
+    result.value = formatResult({
       success: false,
-      error: e.response.data.error || '执行失败',
-    }, null, 2);
+      error: e.response?.data?.error || e.message || '执行失败'
+    });
     executionTime.value = '0.000s';
+    ElMessage.error('执行失败');
   } finally {
     isExecuting.value = false;
   }
 };
 
-const clearResult = () => {
-  result.value = '';
-  executionTime.value = '';
-};
-
-const resetToDefaults = () => {
-  paramsJson.value = JSON.stringify(defaultParams.value, null, 2);
-};
+// 监听工具变化，初始化参数
+watch(() => props.tool, () => {
+  if (props.tool) {
+    initDebugParams();
+    result.value = '';
+    executionTime.value = '';
+  }
+}, { immediate: true });
 </script>
 
 <template>
@@ -194,7 +196,7 @@ const resetToDefaults = () => {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="5 3 19 12 5 21 5 3"/>
         </svg>
-        调试面板
+        调试面板 - {{ tool?.name || '未知工具' }}
       </h4>
       <button class="close-btn" @click="$emit('close')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -205,47 +207,120 @@ const resetToDefaults = () => {
     </div>
 
     <div class="panel-content">
-      <div class="input-section">
+      <!-- 工具描述 -->
+      <div v-if="tool?.description" class="tool-desc">
+        {{ tool.description }}
+      </div>
+
+      <!-- 参数表单 -->
+      <div class="params-section">
         <div class="section-header">
-          <span>输入参数 (JSON)</span>
-          <div class="header-actions">
-            <button class="manus-btn" @click="resetToDefaults" title="重置为默认值">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="23 4 23 10 17 10"/>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-              </svg>
-              默认值
-            </button>
-            <button class="manus-btn" @click="loadExample">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-              示例
-            </button>
-            <button class="manus-btn" @click="paramsJson = '{}'">清空</button>
+          <span>参数配置</span>
+          <button class="reset-btn" @click="resetToDefaults" title="重置为默认值">
+            <el-icon><Refresh /></el-icon>
+            重置
+          </button>
+        </div>
+
+        <!-- 有参数时显示表单 -->
+        <div v-if="tool?.parameters && tool.parameters.length > 0" class="params-form">
+          <div v-for="param in tool.parameters" :key="param.name" class="param-item">
+            <label class="param-label">
+              {{ param.name }}
+              <span v-if="param.required" class="required-mark">*</span>
+              <span class="param-type">({{ param.type }})</span>
+            </label>
+
+            <div class="param-input-wrapper">
+              <!-- 枚举类型 -->
+              <el-select
+                v-if="param.enum && param.enum.length > 0"
+                v-model="debugParams[param.name]"
+                :placeholder="param.description || `请选择${param.name}`"
+                size="small"
+                clearable
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="enumVal in param.enum"
+                  :key="enumVal"
+                  :label="enumVal"
+                  :value="enumVal"
+                />
+              </el-select>
+
+              <!-- 数组类型 -->
+              <div v-else-if="param.type === 'array'" class="array-input-container">
+                <ListValueInput
+                  v-model="debugParams[param.name]"
+                  :key="'debug-' + param.name"
+                />
+              </div>
+
+              <!-- 对象类型 -->
+              <div v-else-if="param.type === 'object'" class="object-input-container">
+                <ObjectKeyValueInput
+                  v-model="debugParams[param.name]"
+                  :key="'debug-' + param.name"
+                />
+              </div>
+
+              <!-- 字符串类型 -->
+              <el-input
+                v-else-if="param.type === 'string'"
+                v-model="debugParams[param.name]"
+                :placeholder="param.description || `请输入${param.name}`"
+                size="small"
+                :type="param.name.includes('password') ? 'password' : 'text'"
+              />
+
+              <!-- 数字类型 -->
+              <el-input
+                v-else-if="param.type === 'number' || param.type === 'integer'"
+                v-model="debugParams[param.name]"
+                :placeholder="param.description || `请输入${param.name}`"
+                size="small"
+                style="width: 100%"
+                @input="handleNumberInput(param.name, $event)"
+              />
+
+              <!-- 布尔类型 -->
+              <el-switch
+                v-else-if="param.type === 'boolean'"
+                v-model="debugParams[param.name]"
+                size="small"
+              />
+
+              <!-- 其他类型 -->
+              <el-input
+                v-else
+                v-model="debugParams[param.name]"
+                :placeholder="param.description || `请输入${param.name}`"
+                size="small"
+              />
+            </div>
+
+            <!-- 参数说明 -->
+            <div class="param-extra" v-if="param.description || (param.default !== undefined && param.default !== '')">
+              <div v-if="param.description" class="param-desc">{{ param.description }}</div>
+              <div v-if="param.default !== undefined && param.default !== ''" class="param-default">
+                默认值: {{ param.default }}
+              </div>
+            </div>
           </div>
         </div>
-        <textarea
-          v-model="paramsJson"
-          class="json-input"
-          :class="{ 'has-error': !isValidJson }"
-          placeholder="请输入 JSON 格式的参数..."
-          spellcheck="false"
-        ></textarea>
-        <div v-if="!isValidJson" class="json-error">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="15" y1="9" x2="9" y2="15"/>
-            <line x1="9" y1="9" x2="15" y2="15"/>
-          </svg>
-          JSON 格式无效
+
+        <!-- 无参数时显示提示 -->
+        <div v-else class="no-params">
+          该工具无需参数
         </div>
       </div>
 
+      <!-- 执行按钮 -->
       <div class="actions-bar">
         <button
           class="execute-btn"
-          :disabled="!isValidJson || isExecuting || !tool?.id"
+          :disabled="isExecuting || !tool?.id"
           @click="execute"
         >
           <svg v-if="!isExecuting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -255,18 +330,12 @@ const resetToDefaults = () => {
             <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
             <path d="M12 2a10 10 0 0 1 10 10"/>
           </svg>
-          {{ isExecuting ? '执行中...' : '执行' }}
-        </button>
-        <button
-          v-if="result"
-          class="manus-btn"
-          @click="clearResult"
-        >
-          清空结果
+          {{ isExecuting ? '执行中...' : '执行工具' }}
         </button>
       </div>
 
-      <div v-if="result || executionTime" class="output-section">
+      <!-- 执行结果 -->
+      <div v-if="result || executionTime" class="result-section">
         <div class="section-header">
           <span>执行结果</span>
           <span v-if="executionTime" class="exec-time">耗时: {{ executionTime }}</span>
@@ -283,7 +352,6 @@ const resetToDefaults = () => {
   flex-direction: column;
   height: 100%;
   background: #ffffff;
-  border-left: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .panel-header {
@@ -300,7 +368,7 @@ const resetToDefaults = () => {
   align-items: center;
   gap: 8px;
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #37352f;
 }
@@ -329,77 +397,196 @@ const resetToDefaults = () => {
   display: flex;
   flex-direction: column;
   padding: 16px;
-  overflow: hidden;
+  overflow-y: auto;
+}
+
+.tool-desc {
+  font-size: 13px;
+  color: #7e7d7a;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f8f8f7;
+  border-radius: 8px;
 }
 
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #7e7d7a;
-}
-
-.header-actions {
-  display: flex;
-  gap: 6px;
-}
-
-.header-actions .manus-btn {
-  height: 28px;
-  padding: 5px 10px;
-  font-size: 11px;
-}
-
-.json-input {
-  flex: 1;
-  width: 100%;
-  min-height: 120px;
-  padding: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  margin-bottom: 12px;
   font-size: 13px;
-  line-height: 1.5;
-  background: #fafafa;
+  font-weight: 500;
   color: #37352f;
-  outline: none;
-  resize: none;
-  transition: all 0.2s ease;
 }
 
-.json-input:focus {
-  background: #ffffff;
-  border-color: #007aff;
-}
-
-.json-input.has-error {
-  border-color: #ff3b30;
-  background: rgba(255, 59, 48, 0.02);
-}
-
-.json-error {
+.reset-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  background: transparent;
+  color: #7e7d7a;
   font-size: 12px;
-  color: #ff3b30;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
+.reset-btn:hover {
+  background: rgba(55, 53, 47, 0.06);
+  color: #37352f;
+}
+
+.params-section {
+  overflow-y: auto;
+}
+
+.params-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.param-item {
+  margin-bottom: 4px;
+}
+
+.param-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #37352f;
+  margin-bottom: 6px;
+}
+
+.required-mark {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.param-type {
+  font-size: 11px;
+  color: #858481;
+  font-weight: 400;
+  margin-left: 6px;
+}
+
+.param-input-wrapper {
+  margin-bottom: 4px;
+}
+
+.param-extra {
+  font-size: 12px;
+  color: #858481;
+  line-height: 1.4;
+}
+
+.param-desc {
+  margin-bottom: 2px;
+}
+
+.param-default {
+  color: #007aff;
+  font-style: normal;
+}
+
+.no-params {
+  padding: 24px;
+  background: #f8f8f7;
+  border-radius: 8px;
+  text-align: center;
+  color: #858481;
+  font-size: 13px;
+}
+
+/* 数组类型输入样式 */
+.array-input-container,
+.object-input-container {
+  width: 100%;
+}
+
+.array-items,
+.object-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.array-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.array-item-input {
+  flex: 1;
+}
+
+.array-item-remove,
+.object-item-remove {
+  flex-shrink: 0;
+  padding: 6px !important;
+  border-radius: 4px !important;
+  min-width: auto !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.array-item-remove:hover,
+.object-item-remove:hover {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.add-array-item-btn,
+.add-object-item-btn {
+  width: 100%;
+  border-style: dashed !important;
+  border-color: #007aff !important;
+  color: #37352f !important;
+  transition: all 0.2s ease !important;
+}
+
+.add-array-item-btn:hover,
+.add-object-item-btn:hover {
+  background-color: rgba(0, 122, 255, 0.1) !important;
+  border-color: #007aff !important;
+  color: #007aff !important;
+}
+
+/* 对象类型输入样式 */
+.object-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.object-key-input {
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.object-value-input {
+  flex: 1;
+}
+
+/* 操作栏 */
 .actions-bar {
   display: flex;
   gap: 10px;
-  padding: 14px 0;
+  padding: 16px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  margin-top: 16px;
 }
 
 .execute-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 10px 24px;
   background: #34c759;
   border: none;
   border-radius: 20px;
@@ -428,27 +615,26 @@ const resetToDefaults = () => {
   to { transform: rotate(360deg); }
 }
 
-.output-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
+/* 结果区域 */
+.result-section {
+  margin-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 16px;
 }
 
 .exec-time {
-  font-size: 11px;
+  font-size: 12px;
   color: #8e8e93;
 }
 
 .result-output {
-  flex: 1;
-  min-height: 0;
-  margin: 0;
+  margin: 8px 0 0 0;
   padding: 12px;
   background: #f8f8f7;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 8px;
   overflow: auto;
+  max-height: 200px;
   font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
   font-size: 12px;
   line-height: 1.6;
@@ -458,5 +644,70 @@ const resetToDefaults = () => {
 .result-output code {
   white-space: pre-wrap;
   word-break: break-all;
+}
+
+/* Element Plus 样式定制 */
+.debug-panel :deep(.el-input__wrapper) {
+  background-color: #fafafa !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+.debug-panel :deep(.el-input__wrapper:hover) {
+  border-color: #007aff !important;
+}
+
+.debug-panel :deep(.el-input__wrapper.is-focus) {
+  border-color: #007aff !important;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.1) !important;
+}
+
+.debug-panel :deep(.el-input__inner) {
+  color: #37352f !important;
+  background-color: transparent !important;
+  font-size: 13px !important;
+}
+
+.debug-panel :deep(.el-input__inner::placeholder) {
+  color: #858481 !important;
+}
+
+.debug-panel :deep(.el-select .el-input__wrapper) {
+  background-color: #fafafa !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+.debug-panel :deep(.el-select-dropdown) {
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.debug-panel :deep(.el-select-dropdown__item) {
+  color: #37352f !important;
+  background-color: transparent !important;
+}
+
+.debug-panel :deep(.el-select-dropdown__item:hover) {
+  background-color: #f8f8f7 !important;
+}
+
+.debug-panel :deep(.el-select-dropdown__item.is-selected) {
+  background-color: rgba(0, 122, 255, 0.1) !important;
+  color: #007aff !important;
+}
+
+.debug-panel :deep(.el-switch__core) {
+  background-color: #e0e0de !important;
+  border-color: #e0e0de !important;
+}
+
+.debug-panel :deep(.el-switch.is-checked .el-switch__core) {
+  background-color: #34c759 !important;
+  border-color: #34c759 !important;
 }
 </style>
