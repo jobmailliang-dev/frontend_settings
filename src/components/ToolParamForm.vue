@@ -276,12 +276,15 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
 }
 
 .param-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0;
   margin: 0 0 16px 0;
-  background: transparent;
+  background: #ffffff;
   border-bottom: none;
 }
 
@@ -351,6 +354,7 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
   border-radius: 8px;
   margin-bottom: 8px;
   transition: background 0.15s ease;
+  overflow: hidden;
 }
 
 .param-item:last-child {
@@ -366,6 +370,7 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
   align-items: flex-start;
   gap: 8px;
   flex: 1;
+  min-width: 0;
 }
 
 .param-drag {
@@ -383,6 +388,8 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .param-field {
@@ -390,12 +397,15 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
   align-items: center;
   gap: 8px;
   flex: 1;
+  min-width: 0;
 }
 
 .param-field-row {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .param-field-checkbox {
@@ -430,6 +440,7 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
 
 .param-input {
   flex: 1;
+  min-width: 0;
   height: 36px;
   padding: 0 12px;
   border: 1px solid rgba(0, 0, 0, 0.1);

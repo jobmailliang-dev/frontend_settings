@@ -638,7 +638,7 @@ onMounted(async () => {
 .config-section :deep(.el-tabs__content) {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: 0;
   background: #ffffff;
 }
 
