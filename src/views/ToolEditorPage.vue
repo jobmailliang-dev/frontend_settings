@@ -368,12 +368,14 @@ onMounted(async () => {
               </div>
 
               <!-- 参数配置 -->
-              <ToolParamForm
-                v-model="editForm.parameters!"
-                :inherit-from="editForm.inherit_from"
-                @sync-params="syncParameters"
-                @change="handleParamsChange"
-              />
+              <div class="param-form-wrapper">
+                <ToolParamForm
+                  v-model="editForm.parameters!"
+                  :inherit-from="editForm.inherit_from"
+                  @sync-params="syncParameters"
+                  @change="handleParamsChange"
+                />
+              </div>
             </el-tab-pane>
 
             <!-- 调试面板 -->
@@ -483,7 +485,12 @@ onMounted(async () => {
 .config-card {
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
   padding: 16px;
+}
+
+.param-form-wrapper {
+  margin-top: 12px;
 }
 
 .config-card h4 {

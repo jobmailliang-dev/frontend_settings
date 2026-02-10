@@ -270,19 +270,19 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
 .param-form {
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 12px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  padding: 16px;
 }
 
 .param-header {
-  position: sticky;
-  top: 0;
-  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  background: #f8f8f7;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 0;
+  margin: 0 0 16px 0;
+  background: transparent;
+  border-bottom: none;
 }
 
 .param-header h4 {
@@ -324,6 +324,8 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
   justify-content: center;
   padding: 40px 20px;
   color: #8e8e93;
+  background: #fafafa;
+  border-radius: 8px;
 }
 
 .empty-state svg {
@@ -337,30 +339,26 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
 }
 
 .param-list {
-  padding: 8px;
+  padding: 0;
 }
 
 .param-item {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  padding: 10px 8px;
+  padding: 12px;
   background: #fafafa;
   border-radius: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   transition: background 0.15s ease;
-}
-
-.param-item:hover {
-  background: #f1f1f0;
-}
-
-.param-item:hover .param-actions {
-  opacity: 1;
 }
 
 .param-item:last-child {
   margin-bottom: 0;
+}
+
+.param-item:hover {
+  background: #f1f1f0;
 }
 
 .param-left {
@@ -414,12 +412,15 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
   width: 40px;
   flex-shrink: 0;
   font-size: 12px;
+  font-weight: 500;
   color: #7e7d7a;
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: default;
+  display: flex;
+  align-items: center;
 }
 
 .param-label:hover {
@@ -429,18 +430,19 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
 
 .param-input {
   flex: 1;
-  height: 32px;
-  padding: 0 10px;
+  height: 36px;
+  padding: 0 12px;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 6px;
-  font-size: 13px;
+  border-radius: 8px;
+  font-size: 14px;
   background: #ffffff;
   color: #37352f;
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .param-input:focus {
+  background: #ffffff;
   border-color: #007aff;
 }
 
@@ -502,9 +504,15 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
 
 .param-actions {
   display: flex;
+  align-items: center;
   gap: 4px;
+  padding-top: 10px;
   opacity: 0;
   transition: opacity 0.15s ease;
+}
+
+.param-item:hover .param-actions {
+  opacity: 1;
 }
 
 .icon-btn {
