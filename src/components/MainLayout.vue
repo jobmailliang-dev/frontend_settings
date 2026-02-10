@@ -53,7 +53,6 @@
           <div class="header-content">
             <div class="breadcrumb-wrapper">
               <el-breadcrumb separator="/">
-                <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
                 <el-breadcrumb-item v-if="parentTitle">
                   <router-link :to="parentRoute" class="breadcrumb-link">{{ parentTitle }}</router-link>
                 </el-breadcrumb-item>

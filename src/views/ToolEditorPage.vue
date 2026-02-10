@@ -421,29 +421,30 @@ onMounted(async () => {
     <!-- 页面头部 -->
     <div class="edit-header">
       <div class="header-left">
-        <button class="back-btn" @click="handleBack">
+        <button class="icon-btn" @click="handleBack" title="返回工具列表">
           <el-icon><ArrowLeft /></el-icon>
-          返回工具列表
         </button>
-        <div class="header-divider"></div>
         <span class="page-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-          </svg>
           {{ isCreating ? '新建工具' : '编辑工具' }}
         </span>
-      </div>
-      <div class="header-actions">
-        <span class="edit-badge" :class="isCreating ? 'creating' : 'editing'">
-          {{ isCreating ? '新建' : '编辑' }}
-        </span>
-        <button class="icon-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏' : '全屏'">
-          <svg v-if="!isFullscreen" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="icon-btn fullscreen-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏' : '全屏'">
+          <svg v-if="!isFullscreen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
           </svg>
-          <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
           </svg>
+        </button>
+      </div>
+      <div class="header-actions">
+        <button class="manus-btn" @click="handleBack">取消</button>
+        <button class="save-btn" @click="saveTool">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          保存
         </button>
       </div>
     </div>
@@ -673,19 +674,6 @@ onMounted(async () => {
               </div>
             </el-tab-pane>
           </el-tabs>
-
-          <!-- 底部操作栏 -->
-          <div class="footer-actions">
-            <button class="manus-btn" @click="handleBack">取消</button>
-            <button class="save-btn" @click="saveTool">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                <polyline points="17 21 17 13 7 13 7 21"/>
-                <polyline points="7 3 7 8 15 8"/>
-              </svg>
-              保存
-            </button>
-          </div>
         </div>
       </template>
     </div>
@@ -732,48 +720,42 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
-  background: #f8f8f7;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
-.back-btn {
+.icon-btn {
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  justify-content: center;
   border: none;
   background: transparent;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #7e7d7a;
+  border-radius: 6px;
+  color: #858481;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.back-btn:hover {
+.icon-btn:hover {
   background: rgba(0, 0, 0, 0.06);
   color: #37352f;
 }
 
-.header-divider {
-  width: 1px;
-  height: 24px;
-  background: rgba(0, 0, 0, 0.12);
-}
-
 .page-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   font-size: 16px;
   font-weight: 600;
   color: #37352f;
+  margin-right: 8px;
+}
+
+.fullscreen-btn {
+  margin-left: 4px;
 }
 
 .header-actions {
@@ -782,23 +764,28 @@ onMounted(async () => {
   gap: 12px;
 }
 
-.icon-btn {
-  width: 36px;
+.header-actions .manus-btn {
   height: 36px;
-  border: none;
-  background: transparent;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #8e8e93;
-  transition: all 0.15s ease;
+  padding: 0 20px;
 }
 
-.icon-btn:hover {
-  background: rgba(0, 0, 0, 0.06);
-  color: #37352f;
+.header-actions .save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 24px;
+  background: #007aff;
+  border: none;
+  border-radius: 20px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.header-actions .save-btn:hover {
+  background: #0066d6;
 }
 
 .edit-badge {
@@ -944,34 +931,6 @@ onMounted(async () => {
   height: 32px;
   padding: 6px 12px;
   font-size: 12px;
-}
-
-.footer-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 16px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  background: #fafafa;
-}
-
-.save-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 24px;
-  background: #007aff;
-  border: none;
-  border-radius: 20px;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.save-btn:hover {
-  background: #0066d6;
 }
 
 /* Element Plus Tabs 样式定制 */
