@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { ArrowLeft, Close, CopyDocument } from '@element-plus/icons-vue';
@@ -54,41 +54,20 @@ const debugResult = ref<any>(undefined);
 
 // 调试面板独立参数（避免与 editForm.parameters 形成双向绑定导致递归监听）
 const toolTestParams = ref<ToolParameter[]>([]);
-let lastParamsSignature = '';
 
-// 生成参数签名（用于比较是否真正发生变化）
-const generateParamsSignature = (params: ToolParameter[]): string => {
-  return JSON.stringify(params.map(p => ({
-    n: p.name,
-    d: p.description,
-    t: p.type,
-    r: p.required,
-    df: p.default,
-    e: p.enum
-  })));
-};
 
 // 初始化调试面板参数
 const initToolTestParams = () => {
   const sourceParams = editForm.value.parameters || [];
   toolTestParams.value = sourceParams.map(p => ({ ...p }));
-  lastParamsSignature = generateParamsSignature(sourceParams);
 };
 
-// 监听参数变化，同步到调试面板（带签名比较避免递归）
-watch(() => editForm.value.parameters, (newParams) => {
-  if (!newParams) {
-    newParams = [];
-  }
-  const newSignature = generateParamsSignature(newParams);
-  // 只有当参数真正发生变化时才更新
-  if (newSignature !== lastParamsSignature) {
-    toolTestParams.value = newParams.map(p => ({ ...p }));
-    lastParamsSignature = newSignature;
-    // 清空之前的调试结果
-    debugResult.value = undefined;
-  }
-}, { deep: true });
+// 处理参数变化事件（来自 ToolParamForm）
+const handleParamsChange = (params: ToolParameter[]) => {
+  toolTestParams.value = params.map(p => ({ ...p }));
+  // 清空之前的调试结果
+  debugResult.value = undefined;
+};
 
 const resetEditForm = () => {
   editForm.value = {
@@ -186,8 +165,6 @@ const handleBack = () => {
 const syncParameters = () => {
   const inheritableTool = store.inheritableTools.find(t => t.name === editForm.value.inherit_from);
   if (inheritableTool?.parameters) {
-    // 先重置签名，避免 ToolParamForm 的 watch 阻止更新
-    lastParamsSignature = '';
     editForm.value.parameters = inheritableTool.parameters.map(p => ({ ...p, required: false }));
     ElMessage.success('已同步参数');
   }
@@ -395,6 +372,7 @@ onMounted(async () => {
                 v-model="editForm.parameters!"
                 :inherit-from="editForm.inherit_from"
                 @sync-params="syncParameters"
+                @change="handleParamsChange"
               />
             </el-tab-pane>
 

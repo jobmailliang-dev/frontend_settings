@@ -13,6 +13,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   'update:modelValue': [params: ToolParameter[]];
   'sync-params': [];
+  'change': [params: ToolParameter[]];
 }>();
 
 const parameterTypes: { value: ParameterType; label: string }[] = [
@@ -64,6 +65,7 @@ watch(localParams, (newVal) => {
   if (newSignature !== lastSignature) {
     lastSignature = newSignature;
     emit('update:modelValue', [...newVal]);
+    emit('change', [...newVal]);
   }
 }, { deep: true });
 
