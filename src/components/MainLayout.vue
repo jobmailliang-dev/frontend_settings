@@ -206,6 +206,7 @@ const handleCommand = async (command: string) => {
   z-index: 100;
   transition: width 0.2s ease;
   overflow: hidden;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .sidebar-header {
@@ -377,6 +378,7 @@ const handleCommand = async (command: string) => {
   position: sticky;
   top: 0;
   z-index: 50;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .header-content {
@@ -389,21 +391,14 @@ const handleCommand = async (command: string) => {
   padding: 0 32px;
 }
 
-.page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: $text-primary;
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
 .breadcrumb-wrapper {
   display: flex;
   align-items: center;
 }
 
 .breadcrumb-wrapper :deep(.el-breadcrumb) {
-  font-size: 14px;
+  font-size: 20px;
+  font-weight: 600;
 }
 
 .breadcrumb-wrapper :deep(.el-breadcrumb__inner) {
@@ -413,7 +408,7 @@ const handleCommand = async (command: string) => {
 
 .breadcrumb-wrapper :deep(.el-breadcrumb__inner.is-link) {
   color: $text-primary;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .breadcrumb-wrapper :deep(.el-breadcrumb__inner.is-link:hover) {
@@ -423,7 +418,7 @@ const handleCommand = async (command: string) => {
 .breadcrumb-link {
   text-decoration: none;
   color: $text-primary;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .breadcrumb-link:hover {

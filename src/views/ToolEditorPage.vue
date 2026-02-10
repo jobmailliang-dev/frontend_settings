@@ -424,9 +424,6 @@ onMounted(async () => {
         <button class="icon-btn" @click="handleBack" title="返回工具列表">
           <el-icon><ArrowLeft /></el-icon>
         </button>
-        <span class="page-title">
-          {{ isCreating ? '新建工具' : '编辑工具' }}
-        </span>
         <button class="icon-btn fullscreen-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏' : '全屏'">
           <svg v-if="!isFullscreen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -685,7 +682,11 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 64px);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 32px;
   background: #ffffff;
+  overflow: hidden;
 }
 
 .tool-editor-page.is-fullscreen {
@@ -719,7 +720,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
+  padding: 16px 0 0;
 }
 
 .header-left {
@@ -745,13 +746,6 @@ onMounted(async () => {
 .icon-btn:hover {
   background: rgba(0, 0, 0, 0.06);
   color: #37352f;
-}
-
-.page-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #37352f;
-  margin-right: 8px;
 }
 
 .fullscreen-btn {
@@ -809,14 +803,15 @@ onMounted(async () => {
   flex: 1;
   display: flex;
   gap: 0;
+  padding: 24px 0 32px;
   overflow: hidden;
+  width: 100%;
 }
 
 .editor-section {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 16px;
   overflow: hidden;
 }
 
