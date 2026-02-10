@@ -12,13 +12,15 @@ interface Props {
   toolDescription?: string;
   toolId?: number;
   parameters?: ToolParameter[];
+  showHeader?: boolean; // 是否显示头部信息
 }
 
 const props = withDefaults(defineProps<Props>(), {
   toolName: '',
   toolDescription: '',
   toolId: undefined,
-  parameters: () => []
+  parameters: () => [],
+  showHeader: true // 默认显示完整模式
 });
 const emit = defineEmits<{
   'close': [];
@@ -29,6 +31,17 @@ const debugParams = ref<Record<string, any>>({});
 const result = ref('');
 const isExecuting = ref(false);
 const executionTime = ref('');
+
+// 记录参数签名，避免不必要的初始化
+let lastParamsSignature = '';
+
+// 生成参数签名
+const generateParamsSignature = (params: ToolParameter[]): string => {
+  return JSON.stringify(params.map(p => ({
+    n: p.name,
+    t: p.type
+  })));
+};
 
 // 初始化调试参数
 const initDebugParams = () => {
@@ -89,10 +102,18 @@ const handleNumberInput = (paramName: string, value: string) => {
   debugParams.value[paramName] = finalValue;
 };
 
-// 监听参数变化，初始化参数
-watch(() => props.parameters, () => {
-  initDebugParams();
-}, { immediate: true });
+// 监听参数变化，初始化参数（带签名比较避免递归）
+watch(() => props.parameters, (newParams) => {
+  if (!newParams) {
+    newParams = [];
+  }
+  const newSignature = generateParamsSignature(newParams);
+  // 只有当参数名称或类型真正变化时才重新初始化
+  if (newSignature !== lastParamsSignature) {
+    lastParamsSignature = newSignature;
+    initDebugParams();
+  }
+}, { immediate: true, deep: true });
 
 // 将表单参数转换为JSON对象
 const convertParamsToJson = (): Record<string, any> => {
@@ -193,7 +214,8 @@ const execute = async () => {
 
 <template>
   <div class="debug-panel">
-    <div class="panel-header">
+    <!-- 完整模式：显示头部 -->
+    <div v-if="props.showHeader" class="panel-header">
       <h4>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="5 3 19 12 5 21 5 3"/>

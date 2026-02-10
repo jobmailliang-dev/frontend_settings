@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { ToolParameter, ParameterType } from '@/types/tool';
 import ObjectKeyValueInput from './ObjectKeyValueInput.vue';
 import ListValueInput from './ListValueInput.vue';
@@ -25,12 +25,46 @@ const parameterTypes: { value: ParameterType; label: string }[] = [
 
 const localParams = ref<ToolParameter[]>([...props.modelValue]);
 
+// 签名比较，避免循环触发
+let lastSignature = '';
+let lastExternalArray: ToolParameter[] | null = null;
+
+// 生成签名
+const generateSignature = (params: ToolParameter[]): string => {
+  return JSON.stringify(params.map(p => ({
+    n: p.name,
+    t: p.type,
+    r: p.required,
+    d: p.description
+  })));
+};
+
 watch(() => props.modelValue, (newVal) => {
-  localParams.value = [...newVal];
+  if (!newVal) newVal = [];
+  // 如果是新的数组引用，直接更新（用于同步参数等场景）
+  if (newVal !== lastExternalArray) {
+    lastExternalArray = newVal;
+    lastSignature = generateSignature(newVal);
+    localParams.value = [...newVal];
+  } else {
+    // 同一数组内变化，使用签名比较
+    const newSignature = generateSignature(newVal);
+    if (newSignature !== lastSignature) {
+      lastSignature = newSignature;
+      localParams.value = [...newVal];
+    }
+  }
 }, { deep: true });
 
+// 监听本地参数变化，同步到外部
 watch(localParams, (newVal) => {
-  emit('update:modelValue', [...newVal]);
+  if (!newVal) newVal = [];
+  const newSignature = generateSignature(newVal);
+  // 只有本地真正变化时才通知外部
+  if (newSignature !== lastSignature) {
+    lastSignature = newSignature;
+    emit('update:modelValue', [...newVal]);
+  }
 }, { deep: true });
 
 const addParameter = () => {
