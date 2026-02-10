@@ -106,7 +106,6 @@ export default {
   gap: 16px;
   padding: 16px 20px;
   background: #ffffff;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   flex-wrap: wrap;
 }
 
