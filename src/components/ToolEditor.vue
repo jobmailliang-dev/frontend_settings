@@ -1,24 +1,34 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, shallowRef } from 'vue';
 import type { editor } from 'monaco-editor';
+import './ToolEditor.scss';
 
 interface Props {
   modelValue: string;
   language?: string;
   readOnly?: boolean;
   height?: string;
+  showRunButton?: boolean;
+  runLoading?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   language: 'javascript',
   readOnly: false,
   height: '400px',
+  showRunButton: false,
+  runLoading: false,
 });
 
 const emit = defineEmits<{
   'update:modelValue': [value: string];
   'change': [value: string];
+  'run': [];
 }>();
+
+const handleRun = () => {
+  emit('run');
+};
 
 const editorContainer = ref<HTMLElement | null>(null);
 const monacoEditor = shallowRef<editor.IStandaloneCodeEditor | null>(null);
@@ -162,6 +172,20 @@ defineExpose({
         代码编辑器
       </span>
       <span class="editor-lang">{{ language }}</span>
+      <div class="header-actions">
+        <slot name="actions"></slot>
+        <el-button
+          v-if="showRunButton"
+          size="small"
+          type="primary"
+          :loading="runLoading"
+          @click="handleRun"
+          class="run-btn"
+        >
+          <el-icon><VideoPlay /></el-icon>
+          运行
+        </el-button>
+      </div>
     </div>
     <div
       ref="editorContainer"
@@ -176,82 +200,9 @@ defineExpose({
         加载编辑器中...
       </div>
     </div>
+    <!-- 扩展区域（用于控制台等） -->
+    <div class="editor-extension" v-if="$slots.extension">
+      <slot name="extension"></slot>
+    </div>
   </div>
 </template>
-
-<style scoped>
-.tool-editor {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.editor-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  background: #f8f8f7;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.editor-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #37352f;
-}
-
-.editor-lang {
-  font-size: 11px;
-  padding: 2px 8px;
-  background: rgba(0, 0, 0, 0.06);
-  border-radius: 4px;
-  color: #7e7d7a;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.editor-content {
-  flex: 1;
-  min-height: 200px;
-}
-
-.editor-textarea {
-  width: 100%;
-  height: 100%;
-  border: none;
-  outline: none;
-  resize: none;
-  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
-  font-size: 13px;
-  line-height: 1.6;
-  padding: 16px;
-  background: #f8f8f7;
-  color: #37352f;
-}
-
-.editor-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  height: 100%;
-  color: #8e8e93;
-  font-size: 13px;
-}
-
-.spinner {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-</style>

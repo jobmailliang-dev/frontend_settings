@@ -4,6 +4,8 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'nprogress/nprogress.css'
+import VueVirtualScroller from 'vue-virtual-scroller'
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 
 import App from './App.vue'
 import router from './router'
@@ -24,6 +26,7 @@ async function startApp() {
   app.use(createPinia())
   app.use(router)
   app.use(ElementPlus)
+  app.use(VueVirtualScroller)
 
   app.mount('#app')
 }

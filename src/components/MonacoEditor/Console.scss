@@ -1,0 +1,223 @@
+/* 控制台样式 - 适配 Manus AI 浅色主题 */
+.console-section {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  min-height: 40px;
+  max-height: 90vh;
+  transition: height 0.15s ease-out;
+  position: relative;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  &.dragging {
+    transition: none;
+  }
+
+  &.minimized {
+    height: auto !important;
+    flex-shrink: 0;
+  }
+}
+
+.console-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -4px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    cursor: row-resize;
+    z-index: 100;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: rgba(0, 122, 255, 0.4);
+    border-radius: 2px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  &:hover::after {
+    opacity: 1;
+  }
+}
+
+.console-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #37352f;
+}
+
+.console-count {
+  color: #858481;
+  font-size: 12px;
+}
+
+.console-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .el-button {
+    color: #858481 !important;
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+    height: 24px !important;
+    border-radius: 6px !important;
+
+    &.active {
+      color: #007aff !important;
+    }
+
+    &:hover {
+      color: #37352f !important;
+      background: rgba(0, 0, 0, 0.04) !important;
+    }
+  }
+}
+
+.console-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  word-break: break-word;
+  white-space: pre-wrap;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  outline: none;
+  background: #fafafa;
+  border-radius: 0 0 8px 8px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f8f8f7;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #e0e0de;
+    border-radius: 3px;
+
+    &:hover {
+      background: #c6c6c5;
+    }
+  }
+}
+
+.virtual-scroller {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  height: 100%;
+}
+
+.console-log {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  min-height: 32px;
+  cursor: pointer;
+  transition: background-color 0.15s ease-out;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: rgba(0, 122, 255, 0.08);
+  }
+
+  &.selected {
+    background-color: rgba(0, 122, 255, 0.15);
+    border-left: 3px solid #007aff;
+    padding-left: 5px;
+  }
+
+  &.log {
+    color: #37352f;
+  }
+
+  &.error {
+    color: #ef4444;
+  }
+
+  &.warn {
+    color: #f59e0b;
+  }
+
+  &.info {
+    color: #007aff;
+  }
+}
+
+.log-timestamp {
+  color: #858481;
+  font-size: 11px;
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+.log-type {
+  color: #007aff;
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 60px;
+}
+
+.log-package {
+  color: #f59e0b;
+  font-weight: 500;
+  white-space: nowrap;
+  min-width: 100px;
+  font-size: 11px;
+}
+
+.log-message {
+  flex: 1;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+}
+
+.console-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+  color: #858481;
+  font-style: italic;
+}

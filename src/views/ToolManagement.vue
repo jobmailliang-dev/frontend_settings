@@ -9,6 +9,7 @@ import ToolEditor from '@/components/ToolEditor.vue';
 import ToolParamForm from '@/components/ToolParamForm.vue';
 import ToolDebugPanel from '@/components/ToolDebugPanel.vue';
 import ToolImportDialog from '@/components/ToolImportDialog.vue';
+import Console from '@/components/MonacoEditor/Console.vue';
 
 const store = useToolStore();
 
@@ -18,6 +19,14 @@ const editingTool = ref<ToolConfig | null>(null);
 const showDebugPanel = ref(false);
 const debugTool = ref<ToolConfig | null>(null);
 const isCreating = ref(false);
+
+// 控制台相关状态
+const showEditorConsole = ref(false);
+const consoleAutoScroll = ref(false);
+const editorConsoleData = ref<Array<{ type: 'log' | 'error' | 'warn' | 'info', message: string, timestamp: Date }>>([]);
+const consoleRef = ref();
+const editorRef = ref();
+const isRunningTool = ref(false);
 
 // 编辑表单数据
 const editForm = ref<Partial<ToolConfig>>({
@@ -175,6 +184,60 @@ const syncParameters = () => {
   }
 };
 
+// 控制台相关方法
+const handleCloseConsole = () => {
+  showEditorConsole.value = false;
+  editorConsoleData.value = [];
+};
+
+const handleClearConsole = () => {
+  editorConsoleData.value = [];
+};
+
+// 运行工具
+const handleRunTool = () => {
+  // 显示控制台
+  showEditorConsole.value = true;
+  consoleAutoScroll.value = true;
+  isRunningTool.value = true;
+
+  // 模拟执行输出（实际应调用工具执行API）
+  const now = Date.now();
+  editorConsoleData.value = [
+    {
+      type: 'info',
+      message: '开始执行工具...',
+      timestamp: new Date(now)
+    }
+  ];
+
+  // 模拟执行完成
+  setTimeout(() => {
+    isRunningTool.value = false;
+    editorConsoleData.value.push({
+      type: 'log',
+      message: '工具执行完成',
+      timestamp: new Date(now + 100)
+    });
+    consoleAutoScroll.value = false;
+  }, 500);
+};
+
+const handleUpdateConsoleData = (data: Array<{ type: 'log' | 'error' | 'warn' | 'info', message: string, timestamp: number }> | { type: 'log' | 'error' | 'warn' | 'info', message: string, timestamp: number }) => {
+  if (!data) {
+    editorConsoleData.value = [];
+    return;
+  }
+
+  const dataArray = Array.isArray(data) ? data : [data];
+  const formattedData = dataArray.map(item => ({
+    type: item.type,
+    message: item.message,
+    timestamp: new Date(item.timestamp)
+  }));
+  editorConsoleData.value.push(...formattedData);
+};
+
 // 加载数据
 onMounted(async () => {
   await Promise.all([
@@ -271,10 +334,25 @@ const toggleFullscreen = () => {
               <!-- 左侧：代码编辑器 -->
               <div class="editor-section">
                 <ToolEditor
+                  ref="editorRef"
                   v-model="editForm.code!"
                   language="javascript"
-                  height="400px"
-                />
+                  height="100%"
+                  :show-run-button="true"
+                  :run-loading="isRunningTool"
+                  @run="handleRunTool"
+                >
+                  <template #extension>
+                    <Console
+                      ref="consoleRef"
+                      v-if="showEditorConsole"
+                      :logs="editorConsoleData"
+                      :auto-scroll="consoleAutoScroll"
+                      @close="handleCloseConsole"
+                      @clear="handleClearConsole"
+                    />
+                  </template>
+                </ToolEditor>
               </div>
 
               <!-- 右侧：配置面板 -->

@@ -35,6 +35,9 @@ importers:
       vue-router:
         specifier: ^4.2.5
         version: 4.6.4(vue@3.5.27(typescript@5.2.2))
+      vue-virtual-scroller:
+        specifier: ^2.0.0-beta.8
+        version: 2.0.0-beta.8(vue@3.5.27(typescript@5.2.2))
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^4.4.1
@@ -1175,6 +1178,9 @@ packages:
     resolution: {integrity: sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow==}
     engines: {node: '>=16 || 14 >=14.17'}
 
+  mitt@2.1.0:
+    resolution: {integrity: sha512-ILj2TpLiysu2wkBbWjAmww7TkZb65aiQO+DkVdUTBpBXq+MHYiETENkKFMtsJZX1Lf4pe4QOrTSjIfUwN5lRdg==}
+
   mlly@1.8.0:
     resolution: {integrity: sha512-l8D9ODSRWLe2KHJSifWGwBqpTZXIXTeo8mlKjY+E2HAakaTeNpqAyBZ8GSqLzHgw4XmHmC8whvpjJNMbFZN7/g==}
 
@@ -1580,6 +1586,16 @@ packages:
     peerDependencies:
       eslint: '>=6.0.0'
 
+  vue-observe-visibility@2.0.0-alpha.1:
+    resolution: {integrity: sha512-flFbp/gs9pZniXR6fans8smv1kDScJ8RS7rEpMjhVabiKeq7Qz3D9+eGsypncjfIyyU84saU88XZ0zjbD6Gq/g==}
+    peerDependencies:
+      vue: ^3.0.0
+
+  vue-resize@2.0.0-alpha.1:
+    resolution: {integrity: sha512-7+iqOueLU7uc9NrMfrzbG8hwMqchfVfSzpVlCMeJQe4pyibqyoifDNbKTZvwxZKDvGkB+PdFeKvnGZMoEb8esg==}
+    peerDependencies:
+      vue: ^3.0.0
+
   vue-router@4.6.4:
     resolution: {integrity: sha512-Hz9q5sa33Yhduglwz6g9skT8OBPii+4bFn88w6J+J4MfEo4KRRpmiNG/hHHkdbRFlLBOqxN8y8gf2Fb0MTUgVg==}
     peerDependencies:
@@ -1593,6 +1609,11 @@ packages:
     hasBin: true
     peerDependencies:
       typescript: '*'
+
+  vue-virtual-scroller@2.0.0-beta.8:
+    resolution: {integrity: sha512-b8/f5NQ5nIEBRTNi6GcPItE4s7kxNHw2AIHLtDp+2QvqdTjVN0FgONwX9cr53jWRgnu+HRLPaWDOR2JPI5MTfQ==}
+    peerDependencies:
+      vue: ^3.2.0
 
   vue@3.5.27:
     resolution: {integrity: sha512-aJ/UtoEyFySPBGarREmN4z6qNKpbEguYHMmXSiOGk69czc+zhs0NF6tEFrY8TZKAl8N/LYAkd4JHVd5E/AsSmw==}
@@ -2731,6 +2752,8 @@ snapshots:
     dependencies:
       brace-expansion: 2.0.2
 
+  mitt@2.1.0: {}
+
   mlly@1.8.0:
     dependencies:
       acorn: 8.15.0
@@ -3102,6 +3125,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  vue-observe-visibility@2.0.0-alpha.1(vue@3.5.27(typescript@5.2.2)):
+    dependencies:
+      vue: 3.5.27(typescript@5.2.2)
+
+  vue-resize@2.0.0-alpha.1(vue@3.5.27(typescript@5.2.2)):
+    dependencies:
+      vue: 3.5.27(typescript@5.2.2)
+
   vue-router@4.6.4(vue@3.5.27(typescript@5.2.2)):
     dependencies:
       '@vue/devtools-api': 6.6.4
@@ -3118,6 +3149,13 @@ snapshots:
       '@vue/language-core': 1.8.27(typescript@5.2.2)
       semver: 7.7.4
       typescript: 5.2.2
+
+  vue-virtual-scroller@2.0.0-beta.8(vue@3.5.27(typescript@5.2.2)):
+    dependencies:
+      mitt: 2.1.0
+      vue: 3.5.27(typescript@5.2.2)
+      vue-observe-visibility: 2.0.0-alpha.1(vue@3.5.27(typescript@5.2.2))
+      vue-resize: 2.0.0-alpha.1(vue@3.5.27(typescript@5.2.2))
 
   vue@3.5.27(typescript@5.2.2):
     dependencies:
