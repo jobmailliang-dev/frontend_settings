@@ -178,6 +178,12 @@ onMounted(async () => {
   background: #ffffff;
 }
 
+.content-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
 .tool-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -196,7 +202,6 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
   min-height: 300px;
   color: #8e8e93;
 }
