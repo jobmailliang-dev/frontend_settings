@@ -51,7 +51,15 @@
       <el-container class="main-container">
         <el-header class="header">
           <div class="header-content">
-            <h1 class="page-title">{{ currentPageTitle }}</h1>
+            <div class="breadcrumb-wrapper">
+              <el-breadcrumb separator="/">
+                <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                <el-breadcrumb-item v-if="parentTitle">
+                  <router-link :to="parentRoute" class="breadcrumb-link">{{ parentTitle }}</router-link>
+                </el-breadcrumb-item>
+                <el-breadcrumb-item>{{ currentPageTitle }}</el-breadcrumb-item>
+              </el-breadcrumb>
+            </div>
             <div class="header-actions">
               <el-dropdown trigger="click" @command="handleCommand">
                 <div class="user-icon-btn">
@@ -101,11 +109,60 @@ const isCollapsed = ref(false)
 const user = computed(() => userStore.user)
 const activeMenu = computed(() => route.path)
 
+// 路由配置：定义父子路由关系
+const routeConfig: Record<string, { parent: string; parentTitle: string; title: string }> = {
+  '/tools': {
+    parent: '/tools',
+    parentTitle: '',
+    title: '工具管理'
+  },
+  '/tools/edit': {
+    parent: '/tools',
+    parentTitle: '工具管理',
+    title: '新建工具'
+  }
+}
+
+// 父级标题
+const parentTitle = computed(() => {
+  const config = routeConfig[route.path]
+  if (config) {
+    return config.parentTitle
+  }
+  // 处理 /tools/edit/:id 路由
+  if (route.path.startsWith('/tools/edit/')) {
+    return '工具管理'
+  }
+  return ''
+})
+
+// 父级路由
+const parentRoute = computed(() => {
+  const config = routeConfig[route.path]
+  if (config) {
+    return config.parent
+  }
+  // 处理 /tools/edit/:id 路由
+  if (route.path.startsWith('/tools/edit/')) {
+    return '/tools'
+  }
+  return '/'
+})
+
+// 当前页面标题
 const currentPageTitle = computed(() => {
+  const config = routeConfig[route.path]
+  if (config) {
+    return config.title
+  }
+  // 处理 /tools/edit/:id 路由
+  if (route.path.startsWith('/tools/edit/')) {
+    return '编辑工具'
+  }
+
   const titles: Record<string, string> = {
     '/home': '首页',
-    '/workbench': '工作台',
-    '/tools': '工具管理'
+    '/workbench': '工作台'
   }
   return titles[route.path] || '首页'
 })
@@ -339,6 +396,39 @@ const handleCommand = async (command: string) => {
   color: $text-primary;
   margin: 0;
   letter-spacing: -0.02em;
+}
+
+.breadcrumb-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-wrapper :deep(.el-breadcrumb) {
+  font-size: 14px;
+}
+
+.breadcrumb-wrapper :deep(.el-breadcrumb__inner) {
+  color: $text-secondary;
+  font-weight: 400;
+}
+
+.breadcrumb-wrapper :deep(.el-breadcrumb__inner.is-link) {
+  color: $text-primary;
+  font-weight: 500;
+}
+
+.breadcrumb-wrapper :deep(.el-breadcrumb__inner.is-link:hover) {
+  color: $primary-blue;
+}
+
+.breadcrumb-link {
+  text-decoration: none;
+  color: $text-primary;
+  font-weight: 500;
+}
+
+.breadcrumb-link:hover {
+  color: $primary-blue;
 }
 
 .header-actions {

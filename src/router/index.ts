@@ -35,6 +35,18 @@ const routes: Array<RouteRecordRaw> = [
         name: 'ToolManagement',
         component: () => import('@/views/ToolManagement.vue'),
         meta: { requiresAuth: true }
+      },
+      {
+        path: 'tools/edit',
+        name: 'ToolEditor',
+        component: () => import('@/views/ToolEditorPage.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'tools/edit/:id',
+        name: 'ToolEditorEdit',
+        component: () => import('@/views/ToolEditorPage.vue'),
+        meta: { requiresAuth: true }
       }
     ]
   },
