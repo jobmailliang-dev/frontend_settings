@@ -96,7 +96,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
+import { useUserStore } from '@next/stores/user'
 import { House, Grid, Setting, User, SwitchButton, Menu, Tools } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -187,10 +187,11 @@ const handleCommand = async (command: string) => {
 </script>
 
 <style scoped lang="scss">
-@use '@/styles/variables.scss' as *;
-
 .main-layout {
-  min-height: 100vh;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
   background: $bg-page;
 }
 
@@ -199,14 +200,16 @@ const handleCommand = async (command: string) => {
   background: $bg-sidebar;
   display: flex;
   flex-direction: column;
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 100;
+  flex-shrink: 0;
+  height: 100%;
+  width: 64px;
   transition: width 0.2s ease;
   overflow: hidden;
   border-right: 1px solid rgba(0, 0, 0, 0.08);
+
+  &.is-expanded {
+    width: 200px;
+  }
 }
 
 .sidebar-header {
@@ -360,23 +363,25 @@ const handleCommand = async (command: string) => {
 
 /* Main Container */
 .main-container {
-  margin-left: 64px;
-  min-height: 100vh;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 64px);
+  min-width: 0;
+  height: 100%;
   background: $bg-page;
-  transition: margin-left 0.2s ease;
 }
 
 .sidebar.is-expanded ~ .main-container {
-  margin-left: 200px;
+  width: calc(100% - 200px);
 }
 
 /* Header */
 .header {
   background: $bg-card;
-  height: 64px;
+  height: 48px;
   padding: 0;
-  position: sticky;
-  top: 0;
+  flex-shrink: 0;
   z-index: 50;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
@@ -433,7 +438,11 @@ const handleCommand = async (command: string) => {
 
 /* Main */
 .main {
+  flex: 1;
   padding: 0;
   background: transparent;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
 }
 </style>

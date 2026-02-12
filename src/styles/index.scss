@@ -1,6 +1,5 @@
 // Global styles - Manus AI Style
-
-@use '@/styles/variables.scss' as *;
+// SCSS 变量已通过 vite.config.ts 全局注入
 
 // Global icon color
 .el-icon {

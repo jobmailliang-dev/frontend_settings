@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "description": "Vue 3 frontend scaffold with MSW mock support",
   "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "scripts": {
     "dev": "vite",
     "dev:mock": "vite --mode mock",

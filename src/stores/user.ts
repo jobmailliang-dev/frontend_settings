@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
-import { authApi } from '@/api/auth'
-import type { User, LoginRequest } from '@/types'
+import { authApi } from '@next/api/auth'
+import type { User, LoginRequest } from '@next/types'
 
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null)

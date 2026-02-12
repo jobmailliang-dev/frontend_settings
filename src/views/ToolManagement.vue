@@ -2,12 +2,12 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import type { ToolConfig } from '@/types/tool';
-import { useToolStore } from '@/stores/toolStore';
-import ToolCard from '@/components/ToolCard.vue';
-import ToolListFilter from '@/components/ToolListFilter.vue';
-import ToolImportDialog from '@/components/ToolImportDialog.vue';
-import ToolDebugPanel from '@/components/ToolDebugPanel.vue';
+import type { ToolConfig } from '@next/types/tool';
+import { useToolStore } from '@next/stores/toolStore';
+import ToolCard from '@next/components/ToolCard.vue';
+import ToolListFilter from '@next/components/ToolListFilter.vue';
+import ToolImportDialog from '@next/components/ToolImportDialog.vue';
+import ToolDebugPanel from '@next/components/ToolDebugPanel.vue';
 
 const router = useRouter();
 const store = useToolStore();
@@ -177,7 +177,8 @@ onMounted(async () => {
 .tool-management {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 156px);
+  height: 100%;
+  min-height: 0;
   background: #ffffff;
 }
 

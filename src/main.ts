@@ -10,7 +10,7 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import App from './App.vue'
 import router from './router'
 import { initMock } from './mocks/server'
-import '@/styles/index.scss'
+import '@next/styles/index.scss'
 
 // 等待 MSW 启动完成后再挂载应用
 async function startApp() {

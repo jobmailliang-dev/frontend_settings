@@ -59,8 +59,8 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { useUserStore } from '@/stores/user'
-import { isMockActive } from '@/mocks/server'
+import { useUserStore } from '@next/stores/user'
+import { isMockActive } from '@next/mocks/server'
 
 const router = useRouter()
 const userStore = useUserStore()

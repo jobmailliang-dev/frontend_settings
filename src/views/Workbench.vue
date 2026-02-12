@@ -172,7 +172,6 @@ const isOverdue = (date: string) => {
 </script>
 
 <style scoped lang="scss">
-@use '@/styles/variables.scss' as *;
 
 .manus-page {
   padding: 12px 16px;

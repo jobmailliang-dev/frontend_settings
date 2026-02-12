@@ -58,9 +58,9 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-import { useUserStore } from '@/stores/user'
-import type { LoginRequest } from '@/types'
-import { isMockActive } from '@/mocks/server'
+import { useUserStore } from '@next/stores/user'
+import type { LoginRequest } from '@next/types'
+import { isMockActive } from '@next/mocks/server'
 
 const isMockEnabled = isMockActive
 

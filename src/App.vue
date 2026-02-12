@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useUserStore } from '@/stores/user'
+import { useUserStore } from '@next/stores/user'
 
 const userStore = useUserStore()
 
@@ -16,13 +16,11 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-@use '@/styles/variables.scss' as *;
-@use '@/styles/index.scss' as *;
+// SCSS 变量已通过 vite.config.ts 全局注入，无需再次导入
 
 #app {
   width: 100%;
   height: 100vh;
-  background: $bg-page;
 }
 
 * {
@@ -33,7 +31,5 @@ onMounted(() => {
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: $bg-page;
-  color: $text-primary;
 }
 </style>

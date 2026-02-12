@@ -3,8 +3,8 @@
  */
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { ToolConfig, ToolFilter, ToolOperationResult } from '@/types/tool';
-import { toolConfigApi } from '@/api/toolConfig';
+import type { ToolConfig, ToolFilter, ToolOperationResult } from '@next/types/tool';
+import { toolConfigApi } from '@next/api/toolConfig';
 
 export const useToolStore = defineStore('tool', () => {
   // 状态

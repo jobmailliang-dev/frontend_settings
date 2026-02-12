@@ -2,10 +2,10 @@
 import { ref, watch, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Refresh } from '@element-plus/icons-vue';
-import type { ToolParameter } from '@/types/tool';
-import { toolConfigApi } from '@/api/toolConfig';
-import ObjectKeyValueInput from '@/components/ObjectKeyValueInput.vue';
-import ListValueInput from '@/components/ListValueInput.vue';
+import type { ToolParameter } from '@next/types/tool';
+import { toolConfigApi } from '@next/api/toolConfig';
+import ObjectKeyValueInput from '@next/components/ObjectKeyValueInput.vue';
+import ListValueInput from '@next/components/ListValueInput.vue';
 
 interface Props {
   toolName?: string;
