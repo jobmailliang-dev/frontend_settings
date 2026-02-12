@@ -220,7 +220,7 @@ const startDrag = (e: MouseEvent) => {
   const onMouseMove = (moveEvent: MouseEvent) => {
     if (!isDragging.value) return;
     const deltaY = startY - moveEvent.clientY;
-    const newHeight = Math.max(150, Math.min(800, startHeight + deltaY));
+    const newHeight = Math.max(100, Math.min(1000, startHeight + deltaY));
     panelHeight.value = `${newHeight}px`;
   };
 
@@ -244,9 +244,11 @@ const startDrag = (e: MouseEvent) => {
 watch(
   () => props.logs,
   (newLogs) => {
+      console.log(1111,props.autoScroll && scrollerRef.value)
     if (props.autoScroll && scrollerRef.value) {
       nextTick(() => {
         requestAnimationFrame(() => {
+          console.log(1111,scrollerRef.value && props.autoScroll)
           if (scrollerRef.value && props.autoScroll) {
             // 使用虚拟滚动组件的 scrollToBottom 方法
             scrollerRef.value.scrollToBottom();

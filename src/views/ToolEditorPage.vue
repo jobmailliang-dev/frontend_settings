@@ -5,7 +5,7 @@ import { ElMessage } from 'element-plus';
 import { ArrowLeft, Close, CopyDocument } from '@element-plus/icons-vue';
 import type { ToolConfig, ToolParameter } from '@/types/tool';
 import { useToolStore } from '@/stores/toolStore';
-import ToolEditor from '@/components/ToolEditor.vue';
+import MonacoEditor from '@/components/MonacoEditor/MonacoEditor.vue';
 import ToolParamForm from '@/components/ToolParamForm.vue';
 import ToolDebugPanel from '@/components/ToolDebugPanel.vue';
 import Console from '@/components/MonacoEditor/Console.vue';
@@ -30,9 +30,8 @@ const toggleFullscreen = () => {
 const showEditorConsole = ref(false);
 const consoleAutoScroll = ref(false);
 const editorConsoleData = ref<Array<{ type: 'log' | 'error' | 'warn' | 'info', message: string, timestamp: Date }>>([]);
-const consoleRef = ref();
+const consoleRef = ref<{ refreshScroller: () => void } | null>(null);
 const editorRef = ref();
-const isRunningTool = ref(false);
 
 // 编辑表单数据
 const editForm = ref<Partial<ToolConfig>>({
@@ -162,6 +161,11 @@ const handleBack = () => {
   router.push('/tools');
 };
 
+// 处理编辑器保存事件（Ctrl+S 快捷键）
+const handleEditorSave = () => {
+  saveTool();
+};
+
 const syncParameters = () => {
   const inheritableTool = store.inheritableTools.find(t => t.name === editForm.value.inherit_from);
   if (inheritableTool?.parameters) {
@@ -180,45 +184,31 @@ const handleClearConsole = () => {
   editorConsoleData.value = [];
 };
 
-// 运行工具
-const handleRunTool = () => {
-  showEditorConsole.value = true;
-  consoleAutoScroll.value = true;
-  isRunningTool.value = true;
-
-  const now = Date.now();
-  editorConsoleData.value = [
-    {
-      type: 'info',
-      message: '开始执行工具...',
-      timestamp: new Date(now)
-    }
-  ];
-
-  setTimeout(() => {
-    isRunningTool.value = false;
-    editorConsoleData.value.push({
-      type: 'log',
-      message: '工具执行完成',
-      timestamp: new Date(now + 100)
-    });
-    consoleAutoScroll.value = false;
-  }, 500);
-};
-
-const handleUpdateConsoleData = (data: Array<{ type: 'log' | 'error' | 'warn' | 'info', message: string, timestamp: number }> | { type: 'log' | 'error' | 'warn' | 'info', message: string, timestamp: number }) => {
-  if (!data) {
-    editorConsoleData.value = [];
-    return;
+// 处理工具调试面板的流式事件
+const handleStreamEvent = ({ event, data }: { event: string; data: any }) => {
+  switch (event) {
+    case 'console':
+    case 'status':
+      showEditorConsole.value = true;
+      consoleAutoScroll.value = true;
+      editorConsoleData.value.push({
+        type: data.type || 'log',
+        message: data.message || JSON.stringify(data),
+        timestamp: new Date((data.timestamp || Date.now() / 1000) * 1000),
+        packageName: data.tool_name || undefined
+      });
+      break;
+    case 'error':
+      consoleAutoScroll.value = false;
+      consoleRef.value?.refreshScroller();
+      debugResult.value = { success: false, error: data.message };
+      break;
+    case 'done':
+      consoleAutoScroll.value = false;
+      consoleRef.value?.refreshScroller();
+      debugResult.value = data.result;
+      break;
   }
-
-  const dataArray = Array.isArray(data) ? data : [data];
-  const formattedData = dataArray.map(item => ({
-    type: item.type,
-    message: item.message,
-    timestamp: new Date(item.timestamp)
-  }));
-  editorConsoleData.value.push(...formattedData);
 };
 
 onMounted(async () => {
@@ -275,14 +265,14 @@ onMounted(async () => {
       <template v-else>
         <!-- 左侧：代码编辑器 -->
         <div class="editor-section">
-          <ToolEditor
+          <MonacoEditor
             ref="editorRef"
             v-model="editForm.code!"
             language="javascript"
             height="100%"
-            :show-run-button="true"
-            :run-loading="isRunningTool"
-            @run="handleRunTool"
+            title="代码编辑器"
+            :enable-save="true"
+            @save="handleEditorSave"
           >
             <template #extension>
               <Console
@@ -294,7 +284,7 @@ onMounted(async () => {
                 @clear="handleClearConsole"
               />
             </template>
-          </ToolEditor>
+          </MonacoEditor>
         </div>
 
         <!-- 右侧：配置面板 -->
@@ -385,6 +375,8 @@ onMounted(async () => {
                   :tool-id="toolId || undefined"
                   :parameters="toolTestParams"
                   :show-header="false"
+                  :use-stream="true"
+                  @stream-event="handleStreamEvent"
                 />
               </div>
             </el-tab-pane>

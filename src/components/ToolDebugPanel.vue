@@ -13,6 +13,7 @@ interface Props {
   toolId?: number;
   parameters?: ToolParameter[];
   showHeader?: boolean; // 是否显示头部信息
+  useStream?: boolean; // 是否使用流式执行
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -20,10 +21,13 @@ const props = withDefaults(defineProps<Props>(), {
   toolDescription: '',
   toolId: undefined,
   parameters: () => [],
-  showHeader: true // 默认显示完整模式
+  showHeader: true, // 默认显示完整模式
+  useStream: false, // 默认使用同步执行
 });
+
 const emit = defineEmits<{
   'close': [];
+  'stream-event': [data: { event: string; data: any }];
 }>();
 
 // 调试参数（表单方式）
@@ -184,9 +188,58 @@ const checkRequiredParams = () => {
   return true;
 };
 
+// 流式事件处理
+const handleStreamEvent = (event: string, data: any) => {
+  emit('stream-event', { event, data });
+
+  switch (event) {
+    case 'status':
+      result.value = formatResult({ message: data.message });
+      break;
+    case 'console':
+      result.value = formatResult(data);
+      break;
+    case 'error':
+      result.value = formatResult({ success: false, error: data.message });
+      break;
+    case 'done':
+      result.value = formatResult(data.result);
+      executionTime.value = data.execution_time ? `${data.execution_time}s` : '';
+      break;
+  }
+};
+
+// 流式执行工具
+const executeStream = async () => {
+  if (!checkRequiredParams()) return;
+
+  isExecuting.value = true;
+  result.value = '';
+  executionTime.value = '';
+
+  const params = convertParamsToJson();
+
+  try {
+    await toolConfigApi.executeToolStream(props.toolId!, { params }, handleStreamEvent);
+    ElMessage.success('执行成功');
+  } catch (e: any) {
+    result.value = formatResult({ success: false, error: e.message || '执行失败' });
+    executionTime.value = '0.000s';
+    ElMessage.error('执行失败');
+  } finally {
+    isExecuting.value = false;
+  }
+};
+
 // 执行工具
 const execute = async () => {
   if (!checkRequiredParams()) return;
+
+  // 如果使用流式执行
+  if (props.useStream) {
+    await executeStream();
+    return;
+  }
 
   isExecuting.value = true;
   result.value = '';

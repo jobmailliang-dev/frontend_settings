@@ -1,0 +1,308 @@
+// Manus AI 浅色主题样式
+.monaco-editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.editor-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f8f8f7;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+
+  .editor-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #37352f;
+
+    svg {
+      color: #5f5e5b;
+    }
+  }
+
+  .editor-lang {
+    font-size: 12px;
+    color: #858481;
+    padding: 2px 8px;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 4px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+  }
+}
+
+.editor-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.monaco-editor-wrapper {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  background: #ffffff;
+}
+
+// Monaco Editor 浅色主题覆盖
+:deep(.monaco-editor) {
+  background: #ffffff !important;
+
+  .margin {
+    background: #ffffff !important;
+  }
+
+  .monaco-editor-background {
+    background: #ffffff !important;
+  }
+
+  .minimap {
+    background: transparent !important;
+  }
+
+  .minimap-slider {
+    background: rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .scrollbar {
+    background: transparent !important;
+
+    .slider {
+      background: rgba(0, 0, 0, 0.15) !important;
+      border-radius: 4px;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.25) !important;
+      }
+    }
+  }
+
+  .cursor {
+    background: #007aff !important;
+    border-left: 2px solid #007aff !important;
+  }
+
+  .selected-text {
+    background: rgba(0, 122, 255, 0.2) !important;
+  }
+
+  .focused-selected-text {
+    background: rgba(0, 122, 255, 0.3) !important;
+  }
+
+  .lineHighlight {
+    background: #f1f1f0 !important;
+  }
+
+  .lineHighlightHover {
+    background: #f8f8f7 !important;
+  }
+
+  .indent-guide {
+    background: rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .current-line {
+    background: rgba(0, 0, 0, 0.03) !important;
+    border: none !important;
+  }
+}
+
+// 浅色主题代码高亮
+:deep(.monaco-editor) {
+  .identifier {
+    color: #d946ef !important;
+  }
+
+  .keyword {
+    color: #9333ea !important;
+    font-weight: 600;
+  }
+
+  .string {
+    color: #16a34a !important;
+  }
+
+  .number {
+    color: #ca8a04 !important;
+  }
+
+  .comment {
+    color: #9ca3af !important;
+    font-style: italic;
+  }
+
+  .type {
+    color: #0891b2 !important;
+  }
+
+  .function {
+    color: #7c3aed !important;
+  }
+
+  .variable {
+    color: #37352f !important;
+  }
+
+  .property {
+    color: #059669 !important;
+  }
+
+  .operator {
+    color: #6b7280 !important;
+  }
+
+  .delimiter {
+    color: #6b7280 !important;
+  }
+
+  .bracket {
+    color: #6b7280 !important;
+  }
+}
+
+// 悬停提示框样式
+:deep(.monaco-editor-hover) {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 6px !important;
+}
+
+// 代码片段建议框
+:deep(.monaco-editor .suggest-widget) {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 6px !important;
+
+  .monaco-list {
+    background: transparent !important;
+
+    .monaco-list-row {
+      background: transparent !important;
+
+      &:hover {
+        background: rgba(55, 53, 47, 0.06) !important;
+      }
+
+      &.selected {
+        background: rgba(0, 122, 255, 0.15) !important;
+      }
+    }
+  }
+}
+
+// 快速修复灯泡
+:deep(.monaco-editor .lightbulb-glyph) {
+  background: transparent !important;
+}
+
+// 折叠控件
+:deep(.monaco-editor .folding-controls-floater) {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+// 内联建议 widget
+:deep(.monaco-editor .inline-editing-view) {
+  background: #ffffff !important;
+}
+
+// 差异查看器样式
+:deep(.monaco-editor .diff-review) {
+  background: #ffffff !important;
+}
+
+// 行号区域
+:deep(.monaco-editor .margin) {
+  background: #ffffff !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+:deep(.monaco-editor .margin-view-overlays) {
+  .line-numbers {
+    color: #858481 !important;
+
+    &.current-line-number {
+      color: #37352f !important;
+      font-weight: 600;
+    }
+  }
+}
+
+// 查找/替换 widget
+:deep(.monaco-editor .find-widget) {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 6px !important;
+}
+
+// 滚动条样式覆盖
+:deep(.monaco-scrollable) {
+  > .scrollbar {
+    &.vertical {
+      background: transparent !important;
+
+      > .slider {
+        background: rgba(0, 0, 0, 0.15) !important;
+        border-radius: 4px;
+        min-height: 30px;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.25) !important;
+        }
+      }
+    }
+
+    &.horizontal {
+      background: transparent !important;
+
+      > .slider {
+        background: rgba(0, 0, 0, 0.15) !important;
+        border-radius: 4px;
+        min-width: 30px;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.25) !important;
+        }
+      }
+    }
+  }
+}
+
+// 输入焦点时的滚动条
+:deep(.monaco-scrollable.dom-focus-scrolled) {
+  > .scrollbar {
+    &.vertical > .slider {
+      background: rgba(0, 0, 0, 0.2) !important;
+    }
+
+    &.horizontal > .slider {
+      background: rgba(0, 0, 0, 0.2) !important;
+    }
+  }
+}

@@ -3,6 +3,7 @@
  */
 import type { ToolConfig, ToolExecuteRequest, ToolExecuteResponse, ToolOperationResult } from '@/types/tool';
 import request from './request';
+import { streamRequest } from '@/utils/streamRequest';
 
 /**
  * API 统一响应包装类型
@@ -142,39 +143,26 @@ export async function getInheritableTools(): Promise<ToolConfig[]> {
 
 /**
  * 执行工具（流式）
- * POST /tool/execute?id={id}
+ * POST /tools/execute?id={id}
  * Body: { params: Record<string, any> }
  * Response: SSE stream
  */
 export function executeToolStream(
   toolId: number,
   params: ToolExecuteRequest,
-  onMessage: (data: any) => void,
-  onError: (error: any) => void,
-  onComplete: () => void
-): () => void {
-  const eventSource = request.stream<ToolExecuteResponse>(`${API_BASE}/execute?id=${toolId}`, params);
-
-  eventSource.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      onMessage(data);
-    } catch {
-      onMessage(event.data);
+  eventHandler: (event: string, data: any) => void
+): Promise<void> {
+  return streamRequest(
+    `/api${API_BASE}/execute/stream?id=${toolId}`,
+    params,
+    eventHandler,
+    {
+      method: 'POST',
+      onError: (error) => {
+        console.error('工具执行失败:', error);
+      }
     }
-  };
-
-  eventSource.onerror = (error) => {
-    onError(error);
-    eventSource.close();
-  };
-
-  eventSource.oncomplete = () => {
-    onComplete();
-    eventSource.close();
-  };
-
-  return () => eventSource.close();
+  );
 }
 
 /**

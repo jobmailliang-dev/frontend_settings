@@ -7,7 +7,7 @@
   flex-direction: column;
   min-height: 40px;
   max-height: 90vh;
-  transition: height 0.15s ease-out;
+  transition: height 0.15s ease-out; /* 缩短过渡时间，提升拖拽响应 */
   position: relative;
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
