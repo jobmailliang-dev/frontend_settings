@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import type { ToolConfig } from '@next/types/tool';
+import type { ToolConfig } from '@settings/types/tool';
 
 interface Props {
   modelValue: boolean;

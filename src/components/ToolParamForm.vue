@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import type { ToolParameter, ParameterType } from '@next/types/tool';
+import type { ToolParameter, ParameterType } from '@settings/types/tool';
 import ObjectKeyValueInput from './ObjectKeyValueInput.vue';
 import ListValueInput from './ListValueInput.vue';
 

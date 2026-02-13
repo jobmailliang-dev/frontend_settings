@@ -1,9 +1,9 @@
 /**
  * 工具配置 API
  */
-import type { ToolConfig, ToolExecuteRequest, ToolExecuteResponse, ToolOperationResult } from '@next/types/tool';
+import type { ToolConfig, ToolExecuteRequest, ToolExecuteResponse, ToolOperationResult } from '@settings/types/tool';
 import request from './request';
-import { streamRequest } from '@next/utils/streamRequest';
+import { streamRequest } from '@settings/utils/streamRequest';
 
 /**
  * API 统一响应包装类型

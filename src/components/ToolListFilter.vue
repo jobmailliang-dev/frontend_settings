@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { useToolStore } from '@next/stores/toolStore';
-import PageToolbar from '@next/components/PageToolbar.vue';
+import { useToolStore } from '@settings/stores/toolStore';
+import PageToolbar from '@settings/components/PageToolbar.vue';
 
 const store = useToolStore();
 const searchInput = ref(store.filter.search || '');

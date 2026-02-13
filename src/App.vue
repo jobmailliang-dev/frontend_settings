@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useUserStore } from '@next/stores/user'
+import { useUserStore } from '@settings/stores/user'
 
 const userStore = useUserStore()
 

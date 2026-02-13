@@ -1,4 +1,4 @@
-import type { ToolConfig } from '@next/types/tool';
+import type { ToolConfig } from '@settings/types/tool';
 
 /**
  * Mock 工具数据

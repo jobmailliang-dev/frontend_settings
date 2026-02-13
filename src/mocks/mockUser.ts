@@ -1,4 +1,4 @@
-import type { User, Role } from '@next/types'
+import type { User, Role } from '@settings/types'
 
 export const mockUser: User = {
   id: 1,

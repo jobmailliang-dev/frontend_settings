@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { ToolConfig } from '@next/types/tool';
+import type { ToolConfig } from '@settings/types/tool';
 
 interface Props {
   tool: ToolConfig;

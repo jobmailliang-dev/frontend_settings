@@ -8,40 +8,40 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'MainLayout',
-    component: () => import('@next/components/MainLayout.vue'),
+    component: () => import('@settings/components/MainLayout.vue'),
     redirect: '/home',
     children: [
       {
         path: 'home',
         name: 'Home',
-        component: () => import('@next/views/Home.vue')
+        component: () => import('@settings/views/Home.vue')
       },
       {
         path: 'workbench',
         name: 'Workbench',
-        component: () => import('@next/views/Workbench.vue')
+        component: () => import('@settings/views/Workbench.vue')
       },
       {
         path: 'tools',
         name: 'ToolManagement',
-        component: () => import('@next/views/ToolManagement.vue')
+        component: () => import('@settings/views/ToolManagement.vue')
       },
       {
         path: 'tools/edit',
         name: 'ToolEditor',
-        component: () => import('@next/views/ToolEditorPage.vue')
+        component: () => import('@settings/views/ToolEditorPage.vue')
       },
       {
         path: 'tools/edit/:id',
         name: 'ToolEditorEdit',
-        component: () => import('@next/views/ToolEditorPage.vue')
+        component: () => import('@settings/views/ToolEditorPage.vue')
       }
     ]
   },
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
-    component: () => import('@next/views/NotFound.vue')
+    component: () => import('@settings/views/NotFound.vue')
   }
 ]
 

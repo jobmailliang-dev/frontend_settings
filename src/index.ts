@@ -2,7 +2,7 @@
  * 子应用入口 - 导出为 Vue 组件
  *
  * 使用方式：
- * import { SubApp } from '@frontend-next-scaffold'
+ * import { SubApp } from 'frontend-settings'
  * <SubApp />
  */
 import { defineComponent, h, createApp, onMounted, ref } from 'vue';
@@ -16,6 +16,7 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 
 import App from './App.vue';
 import router from './router';
+import '@settings/styles/index.scss'
 
 // 导出为 Vue 组件
 export const SubApp = defineComponent({

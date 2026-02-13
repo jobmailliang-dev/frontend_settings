@@ -1,5 +1,5 @@
 import { api } from './request'
-import type { User, UserCreate, AuthTokens, ApiResponse, LoginRequest } from '@next/types'
+import type { User, UserCreate, AuthTokens, ApiResponse, LoginRequest } from '@settings/types'
 
 export const authApi = {
   login(data: LoginRequest) {

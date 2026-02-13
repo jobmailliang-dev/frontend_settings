@@ -2,12 +2,12 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import type { ToolConfig } from '@next/types/tool';
-import { useToolStore } from '@next/stores/toolStore';
-import ToolCard from '@next/components/ToolCard.vue';
-import ToolListFilter from '@next/components/ToolListFilter.vue';
-import ToolImportDialog from '@next/components/ToolImportDialog.vue';
-import ToolDebugPanel from '@next/components/ToolDebugPanel.vue';
+import type { ToolConfig } from '@settings/types/tool';
+import { useToolStore } from '@settings/stores/toolStore';
+import ToolCard from '@settings/components/ToolCard.vue';
+import ToolListFilter from '@settings/components/ToolListFilter.vue';
+import ToolImportDialog from '@settings/components/ToolImportDialog.vue';
+import ToolDebugPanel from '@settings/components/ToolDebugPanel.vue';
 
 const router = useRouter();
 const store = useToolStore();

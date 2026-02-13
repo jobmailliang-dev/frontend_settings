@@ -1,14 +1,14 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { ElMessage } from 'element-plus'
-import router from '@next/router'
-import type { ApiResponse } from '@next/types'
+import router from '@settings/router'
+import type { ApiResponse } from '@settings/types'
 
 // Mock 模式下不设置 baseURL，让请求发到当前域名由 MSW 拦截
 const isMock = import.meta.env.VITE_USE_MOCK === 'true'
-const baseURL = isMock ? '' : (import.meta.env.VITE_API_TARGET ? '/api' : '')
+const baseURL = isMock ? '' : '/api'
 
 const request = axios.create({
-  baseURL: import.meta.env.VITE_API_TARGET ? '/api' : '',
+  baseURL: '/api',
   timeout: 30000,
   headers: { 'Content-Type': 'application/json' }
 })

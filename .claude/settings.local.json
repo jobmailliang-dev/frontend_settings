@@ -10,7 +10,9 @@
       "mcp__Playwright__browser_snapshot",
       "Bash(curl:*)",
       "WebFetch(domain:router.vuejs.org)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Skill(zcf:git-commit)",
+      "Bash(git add:*)"
     ]
   }
 }

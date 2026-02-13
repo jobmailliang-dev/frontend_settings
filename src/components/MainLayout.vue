@@ -96,7 +96,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '@next/stores/user'
+import { useUserStore } from '@settings/stores/user'
 import { House, Grid, Setting, User, SwitchButton, Menu, Tools } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -206,10 +206,10 @@ const handleCommand = async (command: string) => {
   transition: width 0.2s ease;
   overflow: hidden;
   border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
 
-  &.is-expanded {
-    width: 200px;
-  }
+.sidebar.is-expanded {
+  width: 200px;
 }
 
 .sidebar-header {
@@ -366,14 +366,9 @@ const handleCommand = async (command: string) => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  width: calc(100% - 64px);
   min-width: 0;
   height: 100%;
   background: $bg-page;
-}
-
-.sidebar.is-expanded ~ .main-container {
-  width: calc(100% - 200px);
 }
 
 /* Header */

@@ -1,4 +1,4 @@
-# Claude Code Rules for frontend_next
+# Claude Code Rules for frontend_settings
 
 ## API Path Rules for Tools
 

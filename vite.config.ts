@@ -8,7 +8,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const isMock = env.VITE_USE_MOCK === 'true'
+  const isMock = env.VITE_USE_MOCK === 'true'l
 
   // 使用 fileURLToPath 确保路径格式正确
   const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': resolve(__dirname, 'src'),
-        '@next': resolve(__dirname, 'src')
+        '@settings': resolve(__dirname, 'src')
       }
     },
     server: {
