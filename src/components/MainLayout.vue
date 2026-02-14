@@ -8,6 +8,7 @@
         :collapse="isCollapsed"
         :collapse-trigger="null"
       >
+        <!-- TODO: 侧边栏头部 - 暂时隐藏
         <div class="sidebar-header">
           <div class="logo" @click="toggleCollapse" :class="{ 'is-collapsed': isCollapsed }">
             <template v-if="!isCollapsed">
@@ -16,6 +17,7 @@
             <el-icon class="menu-icon"><Menu /></el-icon>
           </div>
         </div>
+        -->
 
         <el-menu
           :default-active="activeMenu"
@@ -59,6 +61,7 @@
                 <el-breadcrumb-item>{{ currentPageTitle }}</el-breadcrumb-item>
               </el-breadcrumb>
             </div>
+            <!-- TODO: 用户图标 - 暂时隐藏
             <div class="header-actions">
               <el-dropdown trigger="click" @command="handleCommand">
                 <div class="user-icon-btn">
@@ -82,6 +85,7 @@
                 </template>
               </el-dropdown>
             </div>
+            -->
           </div>
         </el-header>
 
@@ -166,9 +170,10 @@ const currentPageTitle = computed(() => {
   return titles[route.path] || '首页'
 })
 
-const toggleCollapse = () => {
-  isCollapsed.value = !isCollapsed.value
-}
+// TODO: 侧边栏折叠功能 - 暂时隐藏
+// const toggleCollapse = () => {
+//   isCollapsed.value = !isCollapsed.value
+// }
 
 const handleCommand = async (command: string) => {
   switch (command) {
