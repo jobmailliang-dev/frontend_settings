@@ -30,13 +30,13 @@ export const toolHandlers = [
 
   // Create tool
   http.post('/api/tools', async ({ request }) => {
-    const body = await request.json()
+    const body = await request.json() as Record<string, any>
     const newTool = {
       ...body,
       id: Math.max(...mockTools.map(t => t.id), 0) + 1,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
-    }
+    } as any
     mockTools.push(newTool)
     return HttpResponse.json({ success: true, message: 'Tool created', data: newTool })
   }),
@@ -45,7 +45,7 @@ export const toolHandlers = [
   http.put('/api/tools', async ({ request }) => {
     const url = new URL(request.url)
     const id = parseInt(url.searchParams.get('id') || '0')
-    const body = await request.json()
+    const body = await request.json() as Record<string, any>
     const index = mockTools.findIndex(t => t.id === id)
     if (index !== -1) {
       mockTools[index] = { ...mockTools[index], ...body, updated_at: new Date().toISOString() }
@@ -92,7 +92,7 @@ export const toolHandlers = [
   http.put('/api/tools/active', async ({ request }) => {
     const url = new URL(request.url)
     const id = parseInt(url.searchParams.get('id') || '0')
-    const body = await request.json()
+    const body = await request.json() as { is_active: boolean }
     const index = mockTools.findIndex(t => t.id === id)
     if (index !== -1) {
       mockTools[index] = { ...mockTools[index], is_active: body.is_active, updated_at: new Date().toISOString() }

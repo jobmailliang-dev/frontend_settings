@@ -89,7 +89,7 @@ const emit = defineEmits<{
   clear: [];
 }>();
 
-const scrollerRef = ref<InstanceType<typeof DynamicScroller>>();
+const scrollerRef = ref<any>();
 const contentRef = ref<HTMLElement>();
 const isMinimized = ref(false);
 const scrollerKey = ref(0); // 用于强制重新渲染虚拟列表的 key

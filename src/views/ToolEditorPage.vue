@@ -29,7 +29,7 @@ const toggleFullscreen = () => {
 // 控制台相关状态
 const showEditorConsole = ref(false);
 const consoleAutoScroll = ref(false);
-const editorConsoleData = ref<Array<{ type: 'log' | 'error' | 'warn' | 'info', message: string, timestamp: Date }>>([]);
+const editorConsoleData = ref<Array<{ type: 'log' | 'error' | 'warn' | 'info', message: string, timestamp: Date, packageName?: string }>>([]);
 const consoleRef = ref<{ refreshScroller: () => void } | null>(null);
 const editorRef = ref();
 
@@ -136,21 +136,26 @@ const validateEditForm = () => {
 const saveTool = async () => {
   if (!validateEditForm()) return;
 
-  const result = isCreating.value
-    ? await store.createTool(editForm.value)
-    : await store.updateTool(editForm.value.id!, editForm.value);
+  let toolResult: { id?: number } | boolean = false;
 
-  if (result) {
+  if (isCreating.value) {
+    const result = await store.createTool(editForm.value);
+    toolResult = result || false;
+  } else {
+    toolResult = await store.updateTool(editForm.value.id!, editForm.value);
+  }
+
+  if (toolResult && typeof toolResult === 'object' && 'id' in toolResult && toolResult.id) {
     ElMessage.success(isCreating.value ? '创建成功' : '保存成功');
     await store.loadInheritableTools();
 
     // 如果是新建的，更新状态为编辑模式
-    if (isCreating.value && result.id) {
-      toolId.value = result.id;
-      editForm.value.id = result.id;
+    if (isCreating.value) {
+      toolId.value = toolResult.id;
+      editForm.value.id = toolResult.id;
       isCreating.value = false;
       // 更新 URL 但不跳转
-      window.history.replaceState({}, '', `/tools/edit/${result.id}`);
+      window.history.replaceState({}, '', `/tools/edit/${toolResult.id}`);
     }
   } else {
     ElMessage.error(store.error || '操作失败');

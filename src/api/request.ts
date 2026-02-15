@@ -5,16 +5,16 @@ import type { ApiResponse } from '@settings/types'
 
 // Mock 模式下不设置 baseURL，让请求发到当前域名由 MSW 拦截
 const isMock = import.meta.env.VITE_USE_MOCK === 'true'
-const baseURL = isMock ? '' : '/api'
+const baseURL = isMock ? '' : import.meta.env.VITE_API_TARGET
 
 const request = axios.create({
-  baseURL: '/api',
+  baseURL: baseURL,
   timeout: 30000,
   headers: { 'Content-Type': 'application/json' }
 })
 
 request.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
+  (config) => {
     const token = localStorage.getItem('access_token')
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`

@@ -15,13 +15,7 @@ interface ApiResponse<T> {
   error?: string;
 }
 
-/**
- * 工具列表响应（包含元数据）
- */
-interface ToolListResponse {
-  tools: ToolConfig[];
-  total: number;
-}
+
 
 /** API 基础路径 */
 const API_BASE = '/tools';
@@ -32,7 +26,7 @@ const API_BASE = '/tools';
  * Response: { success: true, data: { tools: ToolConfig[], total: number } }
  */
 export async function getTools(): Promise<ToolConfig[]> {
-  const response = await request.get<ApiResponse<ToolListResponse>>(API_BASE);
+  const response = await request.get<ApiResponse<TToolConfig[]>>(API_BASE);
   return response.data.data || [];
 }
 
@@ -153,7 +147,7 @@ export function executeToolStream(
   eventHandler: (event: string, data: any) => void
 ): Promise<void> {
   return streamRequest(
-    `/api${API_BASE}/execute/stream?id=${toolId}`,
+    `${API_BASE}/execute/stream?id=${toolId}`,
     params,
     eventHandler,
     {

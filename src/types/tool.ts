@@ -3,7 +3,7 @@
  */
 
 /** 工具参数类型 */
-export type ParameterType = 'string' | 'number' | 'boolean' | 'array' | 'object';
+export type ParameterType = 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object';
 
 /** 工具参数定义 */
 export interface ToolParameter {
@@ -57,5 +57,5 @@ export interface ToolFilter {
 export interface ToolOperationResult {
   success: boolean;
   message: string;
-  data?: ToolConfig;
+  data?: ToolConfig | ToolConfig[];
 }

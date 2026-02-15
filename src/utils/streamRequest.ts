@@ -25,7 +25,7 @@ export async function streamRequest<T = any>(
   } = options;
 
   // 获取基础 URL
-  const baseURL = import.meta.env.VITE_API_TARGET || 'http://localhost:8000';
+  const baseURL = import.meta.env.VITE_API_TARGET || '';
 
   try {
     // 构建请求 URL

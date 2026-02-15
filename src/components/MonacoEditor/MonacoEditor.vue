@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount, shallowRef } from 'vue';
-import type { editor } from 'monaco-editor';
+import { ref, watch, onMounted, onBeforeUnmount, shallowRef, nextTick } from 'vue';
+import type * as MonacoEditor from 'monaco-editor';
 import { ElMessage } from 'element-plus';
 import './MonacoEditor.scss';
 
@@ -13,7 +13,7 @@ interface Props {
   width?: string;
   language?: string;
   theme?: 'vs-dark' | 'vs' | 'hc-black';
-  options?: editor.IStandaloneEditorConstructionOptions;
+  options?: MonacoEditor.editor.IStandaloneEditorConstructionOptions;
   readOnly?: boolean;
   minimap?: boolean;
   lineNumbers?: 'on' | 'off' | 'relative' | 'interval';
@@ -60,7 +60,7 @@ const emit = defineEmits<{
 }>();
 
 const editorContainer = ref<HTMLElement>();
-const editor = shallowRef<editor.IStandaloneCodeEditor | null>(null);
+const editorInstance = shallowRef<MonacoEditor.editor.IStandaloneCodeEditor | null>(null);
 const isInitialized = ref(false);
 const isDestroyed = ref(false);
 const currentTheme = ref<'vs-dark' | 'vs'>('vs');
@@ -237,7 +237,7 @@ const initEditor = async () => {
     setupJavaScriptIntelliSense();
     setupJavaScriptFeatures();
 
-    const editorOptions: editor.IStandaloneEditorConstructionOptions = {
+    const editorOptions: MonacoEditor.editor.IStandaloneEditorConstructionOptions = {
       value: props.modelValue,
       language: props.language,
       theme: 'manus-light',
@@ -268,15 +268,15 @@ const initEditor = async () => {
       ...props.options,
     };
 
-    editor.value = monaco.editor.create(editorContainer.value, editorOptions);
+    editorInstance.value = monaco.editor.create(editorContainer.value, editorOptions);
 
-    editor.value.onDidChangeModelContent(() => {
-      const value = editor.value?.getValue() || '';
+    editorInstance.value.onDidChangeModelContent(() => {
+      const value = editorInstance.value?.getValue() || '';
       emit('update:modelValue', value);
     });
 
     // Ctrl+S 保存快捷键
-    editor.value.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+    editorInstance.value.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
       if (props.enableSave) {
         emit('save');
       } else {
@@ -285,7 +285,7 @@ const initEditor = async () => {
     });
 
     nextTick(() => {
-      editor.value?.focus();
+      editorInstance.value?.focus();
     });
 
     isInitialized.value = true;
@@ -297,15 +297,15 @@ const initEditor = async () => {
 
 // 重新布局编辑器
 const layoutEditor = () => {
-  editor.value?.layout();
+  editorInstance.value?.layout();
 };
 
 // 监听modelValue变化
 watch(
   () => props.modelValue,
   (newValue) => {
-    if (editor.value && editor.value.getValue() !== newValue) {
-      editor.value.setValue(newValue);
+    if (editorInstance.value && editorInstance.value.getValue() !== newValue) {
+      editorInstance.value.setValue(newValue);
     }
   },
   { flush: 'post' }
@@ -315,19 +315,19 @@ watch(
 watch(
   () => props.readOnly,
   (readOnly) => {
-    if (editor.value) {
-      editor.value.updateOptions({ readOnly });
+    if (editorInstance.value) {
+      editorInstance.value.updateOptions({ readOnly });
     }
   }
 );
 
 // 暴露给父组件的方法
 defineExpose({
-  focus: () => editor.value?.focus(),
-  getValue: () => editor.value?.getValue() || '',
+  focus: () => editorInstance.value?.focus(),
+  getValue: () => editorInstance.value?.getValue() || '',
   setValue: (value: string) => {
-    if (editor.value) {
-      editor.value.setValue(value);
+    if (editorInstance.value) {
+      editorInstance.value.setValue(value);
     }
   },
   layout: layoutEditor,
@@ -341,7 +341,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   isDestroyed.value = true;
-  editor.value?.dispose();
+  editorInstance.value?.dispose();
   if (workerErrorHandler) {
     window.removeEventListener('error', workerErrorHandler);
     workerErrorHandler = null;

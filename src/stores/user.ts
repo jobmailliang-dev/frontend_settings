@@ -15,9 +15,11 @@ export const useUserStore = defineStore('user', () => {
     try {
       isLoading.value = true
       const response = await authApi.login(credentials)
-      const { access_token } = response.data
-      localStorage.setItem('access_token', access_token)
-      localStorage.setItem('refresh_token', access_token)
+      const tokens = response.data.data as { access_token: string } | undefined
+      if (tokens?.access_token) {
+        localStorage.setItem('access_token', tokens.access_token)
+        localStorage.setItem('refresh_token', tokens.access_token)
+      }
 
       await getCurrentUser()
       return true
@@ -47,7 +49,7 @@ export const useUserStore = defineStore('user', () => {
 
   const getCurrentUser = async () => {
     const response = await authApi.getCurrentUser()
-    user.value = response.data
+    user.value = response.data.data as User | undefined
     return user.value
   }
 

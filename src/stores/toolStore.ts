@@ -98,7 +98,11 @@ export const useToolStore = defineStore('tool', () => {
       const result = await toolConfigApi.createTool(tool);
       if (result.success) {
         await loadTools();
-        return result.data || null;
+        const data = result.data;
+        if (Array.isArray(data)) {
+          return data[0] || null;
+        }
+        return data || null;
       }
       error.value = result.message || '创建工具失败';
       return null;

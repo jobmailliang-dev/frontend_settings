@@ -36,7 +36,7 @@ export const authHandlers = [
 
   // Register handler
   http.post('/api/auth/register', async ({ request }) => {
-    const body = await request.json()
+    const body = await request.json() as Record<string, any>
     return HttpResponse.json({
       success: true,
       data: {
@@ -58,7 +58,7 @@ export const authHandlers = [
 
   // Refresh token handler
   http.post('/api/auth/refresh', async ({ request }) => {
-    const body = await request.json()
+    const body = await request.json() as Record<string, any>
     if (body.refresh_token) {
       return HttpResponse.json({
         success: true,
