@@ -248,7 +248,6 @@ watch(
     if (props.autoScroll && scrollerRef.value) {
       nextTick(() => {
         requestAnimationFrame(() => {
-          console.log(1111,scrollerRef.value && props.autoScroll)
           if (scrollerRef.value && props.autoScroll) {
             // 使用虚拟滚动组件的 scrollToBottom 方法
             scrollerRef.value.scrollToBottom();

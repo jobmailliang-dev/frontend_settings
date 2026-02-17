@@ -59,7 +59,6 @@ export const useToolStore = defineStore('tool', () => {
     error.value = null;
     try {
       tools.value = await toolConfigApi.getTools();
-      console.log("=========", tools.value)
     } catch (e: any) {
       error.value = e.message || '加载工具列表失败';
       console.error('Failed to load tools:', e);
@@ -115,21 +114,25 @@ export const useToolStore = defineStore('tool', () => {
     }
   }
 
-  async function updateTool(id: number, tool: Partial<ToolConfig>): Promise<boolean> {
+  async function updateTool(id: number, tool: Partial<ToolConfig>): Promise<ToolConfig | null> {
     loading.value = true;
     error.value = null;
     try {
       const result = await toolConfigApi.updateTool(id, tool);
       if (result.success) {
         await loadTools();
-        return true;
+        const data = result.data;
+        if (Array.isArray(data)) {
+          return data[0] || null;
+        }
+        return data || null;
       }
       error.value = result.message || '更新工具失败';
-      return false;
+      return null
     } catch (e: any) {
       error.value = e.message || '更新工具失败';
       console.error('Failed to update tool:', e);
-      return false;
+      return null
     } finally {
       loading.value = false;
     }

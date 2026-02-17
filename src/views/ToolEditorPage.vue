@@ -21,10 +21,10 @@ const isCreating = ref(false);
 const loading = ref(true);
 
 // 全屏状态
-const isFullscreen = ref(false);
-const toggleFullscreen = () => {
-  isFullscreen.value = !isFullscreen.value;
-};
+const isFullscreen = ref(true);
+// const toggleFullscreen = () => {
+//   isFullscreen.value = !isFullscreen.value;
+// };
 
 // 控制台相关状态
 const showEditorConsole = ref(false);
@@ -136,15 +136,13 @@ const validateEditForm = () => {
 const saveTool = async () => {
   if (!validateEditForm()) return;
 
-  let toolResult: { id?: number } | boolean = false;
+  let toolResult: { id?: number } | null = null ;
 
   if (isCreating.value) {
-    const result = await store.createTool(editForm.value);
-    toolResult = result || false;
+    toolResult = await store.createTool(editForm.value);
   } else {
     toolResult = await store.updateTool(editForm.value.id!, editForm.value);
   }
-
   if (toolResult && typeof toolResult === 'object' && 'id' in toolResult && toolResult.id) {
     ElMessage.success(isCreating.value ? '创建成功' : '保存成功');
     await store.loadInheritableTools();
@@ -232,7 +230,8 @@ onMounted(async () => {
           <el-icon><ArrowLeft /></el-icon>
           返回
         </button>
-        <button class="manus-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏' : '全屏'">
+        <!-- 全屏按钮已注释，默认新建工具自动全屏 -->
+        <!-- <button class="manus-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏' : '全屏'">
           <svg v-if="!isFullscreen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
           </svg>
@@ -240,7 +239,7 @@ onMounted(async () => {
             <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
           </svg>
           {{ isFullscreen ? '退出全屏' : '全屏' }}
-        </button>
+        </button> -->
       </template>
       <template #right>
         <button class="manus-btn" @click="handleBack">取消</button>
@@ -407,12 +406,17 @@ onMounted(async () => {
 .tool-editor-page.is-fullscreen {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 100;
   height: 100vh;
   max-width: none;
   margin: 0;
   padding: 0;
   border-radius: 0;
+}
+
+/* 全屏模式下工具栏增加左右边距 */
+.tool-editor-page.is-fullscreen :deep(.page-toolbar) {
+  padding: 16px;
 }
 
 .loading-state {

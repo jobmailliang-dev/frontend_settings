@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import type { ToolConfig } from '@settings/types/tool';
-import { useToolStore } from '@settings/stores/toolStore';
-import ToolCard from '@settings/components/ToolCard.vue';
-import ToolListFilter from '@settings/components/ToolListFilter.vue';
-import ToolImportDialog from '@settings/components/ToolImportDialog.vue';
-import ToolDebugPanel from '@settings/components/ToolDebugPanel.vue';
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { ElMessage, ElMessageBox } from "element-plus";
+import type { ToolConfig } from "@settings/types/tool";
+import { useToolStore } from "@settings/stores/toolStore";
+import ToolCard from "@settings/components/ToolCard.vue";
+import ToolListFilter from "@settings/components/ToolListFilter.vue";
+import ToolImportDialog from "@settings/components/ToolImportDialog.vue";
+import ToolDebugPanel from "@settings/components/ToolDebugPanel.vue";
 
 const router = useRouter();
 const store = useToolStore();
@@ -21,7 +21,7 @@ const showDebugPanel = ref(false);
 
 // 跳转到新建工具页面
 const handleCreate = () => {
-  router.push('/tools/edit');
+  router.push("/tools/edit");
 };
 
 // 跳转到编辑工具页面
@@ -34,19 +34,19 @@ const handleDelete = async (tool: ToolConfig) => {
   try {
     await ElMessageBox.confirm(
       `确定要删除工具 "${tool.name}" 吗？此操作不可恢复。`,
-      '确认删除',
+      "确认删除",
       {
-        confirmButtonText: '删除',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
+        confirmButtonText: "删除",
+        cancelButtonText: "取消",
+        type: "warning",
+      },
     );
 
     const success = await store.deleteTool(tool.id!);
     if (success) {
-      ElMessage.success('删除成功');
+      ElMessage.success("删除成功");
     } else {
-      ElMessage.error(store.error || '删除失败');
+      ElMessage.error(store.error || "删除失败");
     }
   } catch {
     // 用户取消
@@ -57,10 +57,10 @@ const handleDelete = async (tool: ToolConfig) => {
 const handleDuplicate = async (tool: ToolConfig) => {
   const result = await store.duplicateTool(tool);
   if (result) {
-    ElMessage.success('复制成功');
+    ElMessage.success("复制成功");
     router.push(`/tools/edit/${result.id}`);
   } else {
-    ElMessage.error(store.error || '复制失败');
+    ElMessage.error(store.error || "复制失败");
   }
 };
 
@@ -68,9 +68,9 @@ const handleToggle = async (tool: ToolConfig) => {
   const newStatus = !tool.is_active;
   const result = await store.toggleTool(tool.id!, newStatus);
   if (result) {
-    ElMessage.success(newStatus ? '已启用' : '已停用');
+    ElMessage.success(newStatus ? "已启用" : "已停用");
   } else {
-    ElMessage.error(store.error || '操作失败');
+    ElMessage.error(store.error || "操作失败");
   }
 };
 
@@ -86,20 +86,22 @@ const closeDebugPanel = () => {
 
 const handleImport = async (tools: ToolConfig[]) => {
   const success = await store.importToolsFromFile(
-    new File([JSON.stringify(tools)], 'import.json', { type: 'application/json' })
+    new File([JSON.stringify(tools)], "import.json", {
+      type: "application/json",
+    }),
   );
 
   if (success) {
     ElMessage.success(`成功导入 ${tools.length} 个工具`);
     showImportDialog.value = false;
   } else {
-    ElMessage.error(store.error || '导入失败');
+    ElMessage.error(store.error || "导入失败");
   }
 };
 
 const handleExport = () => {
   store.exportAllTools();
-  ElMessage.success('导出成功');
+  ElMessage.success("导出成功");
 };
 
 // 加载数据
@@ -121,17 +123,34 @@ onMounted(async () => {
     <div class="content-wrapper">
       <!-- 加载状态 -->
       <div v-if="store.loading" class="loading-state">
-        <svg class="spinner" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
-          <path d="M12 2a10 10 0 0 1 10 10"/>
+        <svg
+          class="spinner"
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
+          <path d="M12 2a10 10 0 0 1 10 10" />
         </svg>
         <p>加载中...</p>
       </div>
 
       <!-- 空状态 -->
       <div v-else-if="store.filteredTools.length === 0" class="empty-state">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1"
+        >
+          <path
+            d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
+          />
         </svg>
         <h3>暂无工具</h3>
         <p>点击上方"新建工具"按钮创建第一个工具</p>
@@ -153,10 +172,7 @@ onMounted(async () => {
     </div>
 
     <!-- 导入对话框 -->
-    <ToolImportDialog
-      v-model="showImportDialog"
-      @import="handleImport"
-    />
+    <ToolImportDialog v-model="showImportDialog" @import="handleImport" />
 
     <!-- 调试面板 -->
     <div v-if="showDebugPanel" class="debug-panel-overlay">
@@ -216,8 +232,12 @@ onMounted(async () => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .empty-state svg {

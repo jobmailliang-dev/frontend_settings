@@ -1,10 +1,10 @@
-# CLAUDE.md
+# WIMI CHAT - 前端设置模块
 
-This file provides guidance to Claude Code when working with code in this repository.
+[根目录../../CLAUDE.md] > [frontend-master](../) > **frontend_settings**
 
 ## 项目愿景 (Project Vision)
 
-Frontend Next Scaffold - 基于 Vue 3 的前端脚手架项目，包含完整的前端架构和 MSW Mock 支持。
+WIMI CHAT 前端设置模块 - 基于 Vue 3 的设置管理界面。
 
 ## 架构总览 (Architecture Overview)
 
@@ -91,200 +91,6 @@ logout()          // 退出登录
 | `/workbench` | 工作台 | 需要认证 |
 | `/tools` | 工具管理 | 需要认证 |
 | `/*` | 404 页面 | - |
-
-## 工具管理 API 规范
-
-### API 路径规则
-
-**核心原则**：所有工具 API 使用统一基础路径 `/tools`，通过 HTTP 方法和查询参数区分操作类型。
-
-```
-API_BASE = '/tools'
-```
-
-**路径设计**：
-
-| 操作类型 | 前端路径 | MSW 路径 | 说明 |
-|---------|----------|----------|------|
-| 列表 | `/tools` | `/api/tools` | GET 获取工具列表 |
-| 单资源 | `/tools?id={id}` | `/api/tools?id={id}` | GET/PUT/DELETE 获取/更新/删除单个 |
-| 创建 | `/tools` | `/api/tools` | POST 创建工具 |
-| 导入 | `/tools/import` | `/api/tools/import` | POST 批量导入 |
-| 导出 | `/tools/export` | `/api/tools/export` | GET 导出工具 |
-| 继承列表 | `/tools/inheritable` | `/api/tools/inheritable` | GET 可继承工具 |
-| 执行 | `/tools/execute?id={id}` | `/api/tools/execute?id={id}` | POST 执行工具 |
-
-**关键规则**：
-- 单资源操作（查询、更新、删除、执行）使用查询参数 `?id={id}`
-- 禁止使用路径参数 `/tools/:id`（MSW 匹配冲突）
-- 二级路由直接拼接在 `/tools` 后
-
-### 接口列表
-
-| 方法 | 路径 | 说明 | 请求体 | 响应数据 |
-|------|------|------|--------|----------|
-| GET | `/api/tools` | 获取工具列表 | - | `{ success: true, data: ToolConfig[] }` |
-| GET | `/api/tools?id={id}` | 获取单个工具 | - | `{ success: true, data: ToolConfig }` |
-| POST | `/api/tools` | 创建工具 | `Partial<ToolConfig>` | `{ success: true, data: ToolConfig, message: string }` |
-| PUT | `/api/tools?id={id}` | 更新工具 | `Partial<ToolConfig>` | `{ success: true, data: ToolConfig, message: string }` |
-| DELETE | `/api/tools?id={id}` | 删除工具 | - | `{ success: true, message: string }` |
-| POST | `/api/tools/import` | 批量导入工具 | `{ tools: ToolConfig[] }` | `{ success: true, data: ToolConfig[], message: string }` |
-| GET | `/api/tools/export` | 导出工具 | - | `Blob (JSON file)` |
-| GET | `/api/tools/inheritable` | 获取可继承工具 | - | `{ success: true, data: ToolConfig[] }` |
-| POST | `/api/tools/execute?id={id}` | 执行工具 | `{ params: Record<string, any> }` | `{ success: true, data: any, execution_time?: string }` |
-
-### 前端 API 代码示例
-
-```typescript
-// api/toolConfig.ts
-const API_BASE = '/tools';
-
-// 集合操作 - 无需查询参数
-export async function getTools(): Promise<ToolConfig[]> {
-  const response = await request.get<ApiResponse<ToolConfig[]>>(API_BASE);
-  return response.data.data || [];
-}
-
-export async function createTool(tool: Partial<ToolConfig>): Promise<ToolOperationResult> {
-  const response = await request.post<ApiResponse<ToolConfig>>(API_BASE, tool);
-  return { success: response.data.success, message: response.data.message || '创建成功', data: response.data.data };
-}
-
-// 单资源操作 - 必须带查询参数 ?id={id}
-export async function getTool(id: number): Promise<ToolConfig | null> {
-  const response = await request.get<ApiResponse<ToolConfig>>(`${API_BASE}?id=${id}`);
-  return response.data.data || null;
-}
-
-export async function updateTool(id: number, tool: Partial<ToolConfig>): Promise<ToolOperationResult> {
-  const response = await request.put<ApiResponse<ToolConfig>>(`${API_BASE}?id=${id}`, tool);
-  return { success: response.data.success, message: response.data.message || '更新成功', data: response.data.data };
-}
-
-export async function deleteTool(id: number): Promise<ToolOperationResult> {
-  const response = await request.delete<ApiResponse<null>>(`${API_BASE}?id=${id}`);
-  return { success: response.data.success, message: response.data.message || '删除成功' };
-}
-
-// 二级路由 - 直接拼接
-export async function getInheritableTools(): Promise<ToolConfig[]> {
-  const response = await request.get<ApiResponse<ToolConfig[]>>(`${API_BASE}/inheritable`);
-  return response.data.data || [];
-}
-
-export async function executeTool(toolId: number, params: Record<string, any>): Promise<ToolExecuteResponse> {
-  const response = await request.post<ApiResponse<ToolExecuteResponse>>(`${API_BASE}/execute?id=${toolId}`, params);
-  return response.data.data;
-}
-```
-
-### 响应格式规范
-
-所有 API 响应统一使用包装格式：
-
-```typescript
-interface ApiResponse<T> {
-  success: boolean;   // 操作是否成功
-  data: T;           // 响应数据
-  message?: string;  // 提示信息
-  error?: string;     // 错误信息
-}
-```
-
-### 数据结构
-
-```typescript
-interface ToolConfig {
-  id?: number;
-  name: string;
-  description: string;
-  is_active: boolean;
-  parameters: ToolParameter[];
-  inherit_from?: string;
-  code: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-interface ToolParameter {
-  name: string;
-  description: string;
-  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
-  required: boolean;
-  default?: any;
-  enum?: string[];
-}
-```
-
-### Mock 数据格式（handlers.ts）
-
-Mock 响应必须使用与真实 API 相同的包装格式：
-
-```typescript
-// handlers.ts
-import { http, HttpResponse } from 'msw';
-
-// 集合操作 - GET /api/tools 用于列表
-http.get('/api/tools', () => {
-  return HttpResponse.json({ success: true, data: mockTools })
-}),
-
-// 单资源操作 - GET /api/tools?id={id}
-http.get('/api/tools', ({ request }) => {
-  const url = new URL(request.url)
-  const id = parseInt(url.searchParams.get('id') || '0')
-  const tool = mockTools.find(t => t.id === id)
-  if (tool) {
-    return HttpResponse.json({ success: true, data: tool })
-  }
-  return HttpResponse.json({ success: false, error: 'Tool not found' }, { status: 404 })
-}),
-
-// 创建操作
-http.post('/api/tools', async ({ request }) => {
-  const body = await request.json()
-  const newTool = { ...body, id: Date.now(), created_at: new Date().toISOString() }
-  mockTools.push(newTool)
-  return HttpResponse.json({ success: true, message: 'Tool created', data: newTool })
-}),
-
-// 更新操作 - PUT /api/tools?id={id}
-http.put('/api/tools', async ({ request }) => {
-  const url = new URL(request.url)
-  const id = parseInt(url.searchParams.get('id') || '0')
-  const body = await request.json()
-  // 更新逻辑...
-  return HttpResponse.json({ success: true, message: 'Tool updated', data: updatedTool })
-}),
-
-// 删除操作 - DELETE /api/tools?id={id}
-http.delete('/api/tools', ({ request }) => {
-  const url = new URL(request.url)
-  const id = parseInt(url.searchParams.get('id') || '0')
-  // 删除逻辑...
-  return HttpResponse.json({ success: true, message: 'Tool deleted' })
-}),
-
-// 二级路由 - GET /api/tools/inheritable
-http.get('/api/tools/inheritable', () => {
-  return HttpResponse.json({ success: true, data: mockTools.filter(t => t.is_active) })
-}),
-
-// 执行操作 - POST /api/tools/execute?id={id}
-http.post('/api/tools/execute', async ({ request }) => {
-  const url = new URL(request.url)
-  const id = parseInt(url.searchParams.get('id') || '0')
-  return HttpResponse.json({ success: true, data: { result: 'Mock result', execution_time: '0.01s' } })
-})
-```
-
-### Mock 文件说明
-
-| 文件 | 说明 |
-|------|------|
-| `src/mocks/handlers.ts` | MSW 请求处理器定义 |
-| `src/mocks/mockUser.ts` | Mock 用户数据 |
-| `src/mocks/server.ts` | MSW 服务初始化 |
 
 ## 设计风格 (Design Style)
 
@@ -413,3 +219,4 @@ $input-border-radius: 12px;  // 搜索框采用大圆角矩形
 | 2026-02-06 | 新增页面 | 新增工作台页面 |
 | 2026-02-06 | 设计风格 | 更新为 Manus AI 浅色主题风格 |
 | 2026-02-09 | API 规范 | 整合工具管理 API 路径规则，统一使用查询参数 |
+| 2026-02-17 | 更新 | 更新为 WIMI CHAT 项目文档 |
