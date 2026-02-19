@@ -27,6 +27,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   'close': [];
+  'start': [onReady: () => void];
   'stream-event': [data: { event: string; data: any }];
 }>();
 
@@ -108,11 +109,13 @@ const handleNumberInput = (paramName: string, value: string) => {
 
 // 监听参数变化，初始化参数（带签名比较避免递归）
 watch(() => props.parameters, (newParams) => {
+  console.log(111)
   if (!newParams) {
     newParams = [];
   }
   const newSignature = generateParamsSignature(newParams);
   // 只有当参数名称或类型真正变化时才重新初始化
+  console.log("watch", lastParamsSignature, newSignature )
   if (newSignature !== lastParamsSignature) {
     lastParamsSignature = newSignature;
     initDebugParams();
@@ -213,6 +216,11 @@ const handleStreamEvent = (event: string, data: any) => {
 const executeStream = async () => {
   if (!checkRequiredParams()) return;
 
+  // 通知父组件开始执行，等待保存完成后再继续
+  await new Promise<void>((resolve) => {
+    emit('start', resolve);
+  });
+
   isExecuting.value = true;
   result.value = '';
   executionTime.value = '';
@@ -240,6 +248,11 @@ const execute = async () => {
     await executeStream();
     return;
   }
+
+  // 通知父组件开始执行，等待保存完成后再继续
+  await new Promise<void>((resolve) => {
+    emit('start', resolve);
+  });
 
   isExecuting.value = true;
   result.value = '';

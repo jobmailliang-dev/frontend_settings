@@ -183,6 +183,7 @@ onMounted(async () => {
           :tool-id="debugTool?.id"
           :parameters="debugTool?.parameters || []"
           @close="closeDebugPanel"
+          @start="ready=>ready()"
         />
       </div>
     </div>

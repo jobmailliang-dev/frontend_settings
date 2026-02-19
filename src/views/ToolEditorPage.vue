@@ -58,12 +58,12 @@ const toolTestParams = ref<ToolParameter[]>([]);
 // 初始化调试面板参数
 const initToolTestParams = () => {
   const sourceParams = editForm.value.parameters || [];
-  toolTestParams.value = sourceParams.map(p => ({ ...p }));
+  toolTestParams.value = sourceParams;
 };
 
 // 处理参数变化事件（来自 ToolParamForm）
 const handleParamsChange = (params: ToolParameter[]) => {
-  toolTestParams.value = params.map(p => ({ ...p }));
+  toolTestParams.value = params;
   // 清空之前的调试结果
   debugResult.value = undefined;
 };
@@ -166,6 +166,7 @@ const handleBack = () => {
 
 // 处理编辑器保存事件（Ctrl+S 快捷键）
 const handleEditorSave = () => {
+  // 然后保存
   saveTool();
 };
 
@@ -185,6 +186,15 @@ const handleCloseConsole = () => {
 
 const handleClearConsole = () => {
   editorConsoleData.value = [];
+};
+
+// 处理工具开始执行，清空控制台，保存后执行回调
+const handleStart = async (onReady: () => void) => {
+  editorConsoleData.value = [];
+  debugResult.value = undefined;
+  await saveTool();
+  // 保存完成后调用回调，继续执行工具
+  onReady();
 };
 
 // 处理工具调试面板的流式事件
@@ -380,6 +390,7 @@ onMounted(async () => {
                   :parameters="toolTestParams"
                   :show-header="false"
                   :use-stream="true"
+                  @start="handleStart"
                   @stream-event="handleStreamEvent"
                 />
               </div>

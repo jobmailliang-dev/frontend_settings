@@ -194,7 +194,8 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
             </div>
             
             <div class="param-field-row">
-              <div class="param-field">
+              <!-- 左侧：类型选择 -->
+              <div class="param-field param-field-type">
                 <label class="param-label">类型</label>
                 <select v-model="param.type" class="param-input" @change="onTypeChange(param)">
                   <option v-for="t in parameterTypes" :key="t.value" :value="t.value">
@@ -202,13 +203,16 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
                   </option>
                 </select>
               </div>
-              <div class="param-field param-field-checkbox">
-                <label class="param-label">必填</label>
-                <input v-model="param.required" type="checkbox" class="checkbox-input" />
-              </div>
-              <div v-if="supportsEnum(param)" class="param-field param-field-checkbox">
-                <label class="param-label">枚举</label>
-                <input v-model="param.hasEnum" type="checkbox" class="checkbox-input" />
+              <!-- 右侧：必填和枚举 -->
+              <div class="param-field param-field-checkboxes">
+                <div class="param-field param-field-checkbox">
+                  <label class="param-label">必填</label>
+                  <input v-model="param.required" type="checkbox" class="checkbox-input" />
+                </div>
+                <div v-if="supportsEnum(param)" class="param-field param-field-checkbox">
+                  <label class="param-label">枚举</label>
+                  <input v-model="param.hasEnum" type="checkbox" class="checkbox-input" />
+                </div>
               </div>
             </div>
 
@@ -412,6 +416,20 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
   flex-shrink: 0;
 }
 
+/* 类型选择和复选框左右平分布局 */
+.param-field-type {
+  flex: 1;
+  min-width: 0;
+}
+
+.param-field-checkboxes {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  justify-content: space-around;
+}
+
 .enum-field-row {
   margin-top: 4px;
   padding-top: 8px;
@@ -419,7 +437,7 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
 }
 
 .param-label {
-  width: 40px;
+  width: 35px;
   flex-shrink: 0;
   font-size: 12px;
   font-weight: 500;
