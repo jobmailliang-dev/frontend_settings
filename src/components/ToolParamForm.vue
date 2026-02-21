@@ -185,11 +185,13 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
             </div>
             <div class="param-field">
               <label class="param-label">描述</label>
-              <input
+              <textarea
                 v-model="param.description"
+                rows="3"
                 type="text"
                 placeholder="参数描述"
                 class="param-input"
+                style="height: 60px;"
               />
             </div>
             
@@ -463,7 +465,7 @@ const onDrop = (e: DragEvent, dropIndex: number) => {
   padding: 0 12px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 12px;
   background: #ffffff;
   color: #37352f;
   outline: none;
