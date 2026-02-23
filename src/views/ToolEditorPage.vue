@@ -58,12 +58,14 @@ const toolTestParams = ref<ToolParameter[]>([]);
 // 初始化调试面板参数
 const initToolTestParams = () => {
   const sourceParams = editForm.value.parameters || [];
-  toolTestParams.value = sourceParams;
+  // 使用 map 创建新数组，确保引用变化触发 watcher
+  toolTestParams.value = sourceParams.map(p => ({ ...p }));
 };
 
 // 处理参数变化事件（来自 ToolParamForm）
 const handleParamsChange = (params: ToolParameter[]) => {
-  toolTestParams.value = params;
+  // 使用 map 创建新数组，确保引用变化触发 watcher
+  toolTestParams.value = params.map(p => ({ ...p }));
   // 清空之前的调试结果
   debugResult.value = undefined;
 };

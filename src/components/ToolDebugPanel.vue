@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, shallowRef } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Refresh } from '@element-plus/icons-vue';
 import type { ToolParameter } from '@settings/types/tool';
@@ -37,16 +37,8 @@ const result = ref('');
 const isExecuting = ref(false);
 const executionTime = ref('');
 
-// 记录参数签名，避免不必要的初始化
-let lastParamsSignature = '';
-
-// 生成参数签名
-const generateParamsSignature = (params: ToolParameter[]): string => {
-  return JSON.stringify(params.map(p => ({
-    n: p.name,
-    t: p.type
-  })));
-};
+// 监听参数变化，初始化参数
+const paramsRef = shallowRef<ToolParameter[]>();
 
 // 初始化调试参数
 const initDebugParams = () => {
@@ -107,19 +99,15 @@ const handleNumberInput = (paramName: string, value: string) => {
   debugParams.value[paramName] = finalValue;
 };
 
-// 监听参数变化，初始化参数（带签名比较避免递归）
+// 监听参数变化，初始化参数
+// 使用 deep: true 监听数组引用和内容变化
 watch(() => props.parameters, (newParams) => {
-  console.log(111)
+  console.log('[ToolDebugPanel] 参数变化:', newParams?.map(p => p.name));
   if (!newParams) {
     newParams = [];
   }
-  const newSignature = generateParamsSignature(newParams);
-  // 只有当参数名称或类型真正变化时才重新初始化
-  console.log("watch", lastParamsSignature, newSignature )
-  if (newSignature !== lastParamsSignature) {
-    lastParamsSignature = newSignature;
-    initDebugParams();
-  }
+  // 任何参数变化都重新初始化调试参数
+  initDebugParams();
 }, { immediate: true, deep: true });
 
 // 将表单参数转换为JSON对象

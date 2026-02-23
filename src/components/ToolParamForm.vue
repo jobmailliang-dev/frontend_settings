@@ -61,12 +61,14 @@ watch(() => props.modelValue, (newVal) => {
 watch(localParams, (newVal) => {
   if (!newVal) newVal = [];
   const newSignature = generateSignature(newVal);
-  // 只有本地真正变化时才通知外部
+  // 本地参数变化时，总是通知外部（用于调试面板同步）
+  // 使用签名比较避免同一对象内部修改导致的循环
   if (newSignature !== lastSignature) {
     lastSignature = newSignature;
     emit('update:modelValue', [...newVal]);
-    emit('change', [...newVal]);
   }
+  // 始终发射 change 事件，用于调试面板实时更新
+  emit('change', [...newVal]);
 }, { deep: true });
 
 const addParameter = () => {
