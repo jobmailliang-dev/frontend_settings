@@ -12,7 +12,8 @@
       "WebFetch(domain:router.vuejs.org)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Skill(zcf:git-commit)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

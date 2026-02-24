@@ -40,11 +40,33 @@ const editForm = ref<Partial<ToolConfig>>({
   is_active: true,
   parameters: [],
   inherit_from: '',
-  code: `// 在此编写工具代码
-function execute(params) {
-  // 工具逻辑
-  return { success: true, result: null };
-}`,
+  code: `/**
+ * 工具代码模板
+ * context 对象包含以下属性:
+ * - context.args: 工具参数对象 (来自用户在调试面板输入的参数)
+ * - context.user_info: 当前用户信息 (包含 id, username, email 等)
+ * - context.data: 继承工具的执行结果 (如果有继承工具)
+ *
+ * 返回值: 直接 return 返回结果，支持字符串、数字、对象等
+ */
+
+// 获取参数 (从 context.args 中提取)
+const { 参数名 } = context.args || {};
+
+// 获取用户信息
+const userId = context.user_info?.id;
+const username = context.user_info?.username;
+
+// 获取继承工具结果 (如果有)
+const inheritResult = context.data;
+
+// 工具逻辑实现
+console.log('参数:', context.args);
+console.log('用户:', context.user_info);
+console.log('继承结果:', context.data);
+
+// 返回结果 (直接 return 即可)
+return "工具执行成功"`,
 });
 
 // 调试面板相关状态
@@ -77,11 +99,33 @@ const resetEditForm = () => {
     is_active: true,
     parameters: [],
     inherit_from: '',
-    code: `// 在此编写工具代码
-function execute(params) {
-  // 工具逻辑
-  return { success: true, result: null };
-}`,
+    code: `/**
+ * 工具代码模板
+ * context 对象包含以下属性:
+ * - context.args: 工具参数对象 (来自用户在调试面板输入的参数)
+ * - context.user_info: 当前用户信息 (包含 id, username, email 等)
+ * - context.data: 继承工具的执行结果 (如果有继承工具)
+ *
+ * 返回值: 直接 return 返回结果，支持字符串、数字、对象等
+ */
+
+// 获取参数 (从 context.args 中提取)
+const { 参数名 } = context.args || {};
+
+// 获取用户信息
+const userId = context.user_info?.id;
+const username = context.user_info?.username;
+
+// 获取继承工具结果 (如果有)
+const inheritResult = context.data;
+
+// 工具逻辑实现
+console.log('参数:', context.args);
+console.log('用户:', context.user_info);
+console.log('继承结果:', context.data);
+
+// 返回结果 (直接 return 即可)
+return "工具执行成功"`,
   };
   isCreating.value = true;
   initToolTestParams();
