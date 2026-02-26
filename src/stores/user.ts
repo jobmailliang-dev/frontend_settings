@@ -65,13 +65,13 @@ export const useUserStore = defineStore('user', () => {
 
   const initializeUser = async () => {
     const token = localStorage.getItem('access_token')
-    if (token && !user.value) {
-      try {
-        await getCurrentUser()
-      } catch {
-        console.log('Failed to initialize user')
-      }
-    }
+    // if (token && !user.value) {
+    //   try {
+    //     await getCurrentUser()
+    //   } catch {
+    //     console.log('Failed to initialize user')
+    //   }
+    // }
   }
 
   return {

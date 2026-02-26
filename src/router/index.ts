@@ -9,18 +9,19 @@ const routes: Array<RouteRecordRaw> = [
     path: '/',
     name: 'MainLayout',
     component: () => import('@settings/components/MainLayout.vue'),
-    redirect: '/home',
+    redirect: '/tools',
     children: [
       {
         path: 'home',
         name: 'Home',
         component: () => import('@settings/views/Home.vue')
       },
-      {
-        path: 'workbench',
-        name: 'Workbench',
-        component: () => import('@settings/views/Workbench.vue')
-      },
+      // TODO: 工作台路由 - 暂时隐藏
+      // {
+      //   path: 'workbench',
+      //   name: 'Workbench',
+      //   component: () => import('@settings/views/Workbench.vue')
+      // },
       {
         path: 'tools',
         name: 'ToolManagement',

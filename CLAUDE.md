@@ -1,41 +1,12 @@
+[根目录](../../CLAUDE.md) > [frontend-master](../) > **frontend_settings**
+
 # WIMI CHAT - 前端设置模块
 
-[根目录../../CLAUDE.md] > [frontend-master](../) > **frontend_settings**
+## 模块职责
 
-## 项目愿景 (Project Vision)
+Frontend_settings 模块是 WIMI CHAT 的设置管理界面，提供基于 Vue 3 的用户设置、工具管理等功能。
 
-WIMI CHAT 前端设置模块 - 基于 Vue 3 的设置管理界面。
-
-## 架构总览 (Architecture Overview)
-
-```
-src/
-├── api/              # HTTP 请求层
-├── components/      # 共享 Vue 组件
-├── mocks/          # MSW Mock 服务
-├── router/          # Vue Router 配置
-├── stores/          # Pinia 状态管理
-├── styles/         # 全局样式
-├── types/          # TypeScript 类型定义
-├── views/          # 页面级组件
-├── App.vue         # 根组件
-├── env.d.ts        # 环境类型声明
-└── main.ts         # 应用入口
-```
-
-## 技术栈 (Tech Stack)
-
-| 技术 | 用途 |
-|------|------|
-| **Vue 3** | 前端框架 (Composition API + TypeScript) |
-| **Vite** | 构建工具 |
-| **Element Plus** | UI 组件库 (自动注册) |
-| **Pinia** | 状态管理 |
-| **Vue Router** | 路由管理，包含导航守卫 |
-| **Axios** | HTTP 客户端 |
-| **MSW** | Mock Service Worker |
-
-## 运行与开发 (Commands)
+## 常用命令
 
 ```bash
 # Mock 模式开发
@@ -52,14 +23,43 @@ pnpm lint             # ESLint
 pnpm format           # Prettier
 ```
 
-## 环境变量 (Environment Variables)
+## 技术栈
+
+| 技术 | 用途 |
+|------|------|
+| **Vue 3** | 前端框架 (Composition API + TypeScript) |
+| **Vite** | 构建工具 |
+| **Element Plus** | UI 组件库 (自动注册) |
+| **Pinia** | 状态管理 |
+| **Vue Router** | 路由管理，包含导航守卫 |
+| **Axios** | HTTP 客户端 |
+| **MSW** | Mock Service Worker |
+
+## 架构总览
+
+```
+src/
+├── api/              # HTTP 请求层
+├── components/       # 共享 Vue 组件
+├── mocks/           # MSW Mock 服务
+├── router/          # Vue Router 配置
+├── stores/          # Pinia 状态管理
+├── styles/          # 全局样式
+├── types/           # TypeScript 类型定义
+├── views/           # 页面级组件
+├── App.vue          # 根组件
+├── env.d.ts         # 环境类型声明
+└── main.ts          # 应用入口
+```
+
+## 环境变量
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
 | `VITE_API_TARGET` | 真实 API 目标地址 | `http://localhost:8000` |
 | `VITE_USE_MOCK` | 是否启用 MSW Mock | `false` |
 
-## 目录结构详解 (Directory Structure)
+## 目录结构详解
 
 ### api/ - API 层
 
@@ -92,7 +92,7 @@ logout()          // 退出登录
 | `/tools` | 工具管理 | 需要认证 |
 | `/*` | 404 页面 | - |
 
-## 设计风格 (Design Style)
+## 设计风格
 
 ### 风格定位
 
@@ -164,7 +164,7 @@ $btn-border-radius-pill: 20px;
 $input-border-radius: 12px;  // 搜索框采用大圆角矩形
 ```
 
-### 按钮风格 (Button Style)
+### 按钮风格
 
 | 属性 | 修改/补充值 | 说明 |
 |------|------------|------|
@@ -220,3 +220,4 @@ $input-border-radius: 12px;  // 搜索框采用大圆角矩形
 | 2026-02-06 | 设计风格 | 更新为 Manus AI 浅色主题风格 |
 | 2026-02-09 | API 规范 | 整合工具管理 API 路径规则，统一使用查询参数 |
 | 2026-02-17 | 更新 | 更新为 WIMI CHAT 项目文档 |
+| 2026-02-26 | 更新 | 完善模块文档，统一格式 |

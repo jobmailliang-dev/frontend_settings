@@ -25,18 +25,20 @@
           router
           class="sidebar-menu"
         >
-          <el-menu-item index="/home">
+<!--           <el-menu-item index="/home">
             <div class="menu-icon-wrapper">
               <el-icon><House /></el-icon>
             </div>
             <template #title>首页</template>
-          </el-menu-item>
+          </el-menu-item> -->
+          <!-- TODO: 工作台菜单 - 暂时隐藏
           <el-menu-item index="/workbench">
             <div class="menu-icon-wrapper">
               <el-icon><Grid /></el-icon>
             </div>
             <template #title>工作台</template>
           </el-menu-item>
+          -->
           <el-menu-item index="/tools">
             <div class="menu-icon-wrapper">
               <el-icon><Tools /></el-icon>
