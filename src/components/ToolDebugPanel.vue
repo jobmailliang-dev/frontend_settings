@@ -53,13 +53,21 @@ const initDebugParams = () => {
           const numValue = parseFloat(param.default);
           params[param.name] = isNaN(numValue) ? '' : numValue;
         } else if (param.type === 'object') {
-          if (typeof param.default === 'object' && param.default !== null && !Array.isArray(param.default)) {
+          // 对象类型的默认值需要转换为数组格式供ObjectKeyValueInput使用
+          if (Array.isArray(param.default)) {
+            // 数组格式：[{key: "a", value: "1"}]，已经是正确格式
+            params[param.name] = param.default.map(item => ({
+              key: item.key ?? '',
+              value: typeof item.value === 'string' ? item.value : JSON.stringify(item.value)
+            }))
+          } else if (typeof param.default === 'object' && param.default !== null) {
+            // 普通对象格式：{a: "1"}，需要转换为数组格式
             params[param.name] = Object.entries(param.default).map(([key, value]) => ({
               key,
               value: typeof value === 'string' ? value : JSON.stringify(value)
-            }));
+            }))
           } else {
-            params[param.name] = [{ key: '', value: '' }];
+            params[param.name] = [{ key: '', value: '' }]
           }
         } else {
           params[param.name] = param.default;

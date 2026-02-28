@@ -182,12 +182,39 @@ const validateEditForm = () => {
 const saveTool = async () => {
   if (!validateEditForm()) return;
 
-  let toolResult: { id?: number } | null = null ;
+  // 处理对象类型默认值：将数组格式转换为普通对象格式
+  const processParamsForSave = (params: any[]): any[] => {
+    return params?.map(param => {
+      if (param.type === 'object' && Array.isArray(param.default)) {
+        const obj: Record<string, any> = {};
+        param.default.forEach((item: any) => {
+          if (item.key && item.key.trim() !== '') {
+            let parsedValue = item.value;
+            try {
+              parsedValue = JSON.parse(item.value);
+            } catch {
+            }
+            obj[item.key] = parsedValue;
+          }
+        });
+        return { ...param, default: obj };
+      }
+      return param;
+    }) || [];
+  };
+
+  // 创建副本进行处理，避免直接修改原数据
+  const formData = {
+    ...editForm.value,
+    parameters: processParamsForSave(editForm.value.parameters || [])
+  };
+
+  let toolResult: { id?: number } | null = null;
 
   if (isCreating.value) {
-    toolResult = await store.createTool(editForm.value);
+    toolResult = await store.createTool(formData);
   } else {
-    toolResult = await store.updateTool(editForm.value.id!, editForm.value);
+    toolResult = await store.updateTool(editForm.value.id!, formData);
   }
   if (toolResult && typeof toolResult === 'object' && 'id' in toolResult && toolResult.id) {
     ElMessage.success(isCreating.value ? '创建成功' : '保存成功');

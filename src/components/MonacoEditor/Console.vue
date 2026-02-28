@@ -160,16 +160,10 @@ const handleKeydown = (e: KeyboardEvent) => {
     selectedIndex.value = -1; // 取消选中
   } else if (e.key === 'c' && (e.ctrlKey || e.metaKey) && selectedIndex.value >= 0) {
     e.preventDefault();
-    // 复制选中的完整日志数据（包含所有字段）
+    // 只复制 message 信息
     const selectedLog = props.logs[selectedIndex.value];
     if (selectedLog) {
-      const copyData = {
-        type: selectedLog.type,
-        message: selectedLog.message,
-        timestamp: selectedLog.timestamp.toISOString(),
-        ...(selectedLog.packageName && { packageName: selectedLog.packageName })
-      };
-      navigator.clipboard.writeText(JSON.stringify(copyData, null, 2));
+      navigator.clipboard.writeText(selectedLog.message);
     }
   }
 };
