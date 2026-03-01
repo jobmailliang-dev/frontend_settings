@@ -200,8 +200,6 @@ const setupJavaScriptIntelliSense = () => {
     noSemanticValidation: false, // 不禁用语义验证
     noSyntaxValidation: false, // 不禁用语法验证
     noSuggestionDiagnostics: true, // 禁用建议诊断（减少不必要的提示）
-    validateAll: false, // 不完全验证所有文件
-    semanticDelay: 500, // 增加语义验证延迟，减少频繁验证
   });
 };
 
@@ -669,9 +667,7 @@ const initEditor = async () => {
       parameterHints: {
         enabled: props.parameterHints,
       },
-      folding: {
-        enabled: props.folding,
-      },
+      folding: props.folding,
       foldingStrategy: "indentation",
       showFoldingControls: "always",
       formatOnPaste: props.formatOnPaste,
@@ -691,7 +687,6 @@ const initEditor = async () => {
       lightbulb: { enabled: true }, // 左侧快速修复小灯泡
       wordBasedSuggestions: true, // 基于文档中已出现过的单词提供补全
       links: true, // 自动识别变量引用关系
-      validate: false, // 关闭实时验证，减少 Worker 压力
       ...props.options,
     };
 
@@ -1014,7 +1009,7 @@ watch(
         wordWrap: props.wordWrap,
         minimap: { enabled: props.minimap },
         bracketPairColorization: { enabled: props.bracketPairColorization },
-        folding: { enabled: props.folding },
+        folding: props.folding,
       });
     }
   }
@@ -1084,8 +1079,8 @@ defineExpose({
     editor.value?.revealLineInCenter(lineNumber),
   revealPosition: (position: monaco.Position) =>
     editor.value?.revealPositionInCenter(position),
-  triggerSuggest: () => editor.value?.triggerSuggest(),
-  insertText: (text: string) => editor.value?.trigger("type", { text }),
+  triggerSuggest: () => editor.value?.trigger("suggest", "editor.action.triggerSuggest", null),
+  insertText: (text: string) => editor.value?.trigger("insert", "type", { text }),
   isDisposed: () => !editor.value,
   addConsoleLog,
   clearConsole,
